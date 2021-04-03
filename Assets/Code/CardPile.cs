@@ -15,5 +15,9 @@ namespace Klondike
         [SerializeField, Range(0,52)] protected int _numberOfCards;
         protected Vector3[] _positions;
         protected Quaternion _rotation;
+
+        public virtual void TakeCard(Card card)
+        {
+        }
     }
 }

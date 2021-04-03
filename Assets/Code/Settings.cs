@@ -10,10 +10,22 @@ namespace Klondike
         public float cardHeight = 8.7f;
         public float cardThickness = 0.1f;
 
+        public float cardAngle = 2f;
+
+        [SerializeField] private float closedCardMinSpacing = 15f;
+
+        public float ClosedCardMinSpacing
+        {
+            get
+            {
+                return cardHeight * closedCardMinSpacing / 100f;
+            }
+        }
+
         public Quaternion faceUp = Quaternion.LookRotation(
                 forward: Vector3.forward,
                 upwards: Vector3.up);
-                
+
         public Quaternion faceDown = Quaternion.LookRotation(
                 forward: Vector3.forward,
                 upwards: Vector3.down);

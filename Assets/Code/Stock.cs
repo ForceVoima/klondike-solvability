@@ -9,7 +9,7 @@ namespace Klondike
         [Header("Stock specific")]
         [SerializeField] private GameObject _cards;
 
-        private void Awake()
+        public void Init()
         {
             _type = PileType.Stock;
 
@@ -46,6 +46,42 @@ namespace Klondike
 
                 _numberOfCards++;
             }
+        }
+
+        public void Shuffle()
+        {
+            Card[] array = new Card[_pile.Length];
+
+            for (int i = 0; i < _pile.Length; i++)
+            {
+                array[i] = _pile[i];
+                _pile[i] = null;
+            }
+
+            int random = 0;
+            Card temp;
+
+            for (int i = 0; i < _pile.Length; i++)
+            {
+                random = Random.Range(0, _pile.Length - 1);
+
+                temp = array[random];
+                array[random] = array[i];
+                array[i] = temp;
+            }
+
+            for (int i = 0; i < array.Length; i++)
+            {
+                array[i].MoveTo( _positions[i], _rotation, true);
+                _pile[i] = array[i];
+            }
+        }
+
+        public void DealCard(CardPile pile)
+        {
+            pile.TakeCard( _pile[ _numberOfCards-1 ]);
+            _pile[ _numberOfCards-1 ] = null;
+            _numberOfCards--;
         }
     }
 }
