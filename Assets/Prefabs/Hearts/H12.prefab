@@ -9,6 +9,16 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 636640197768117910, guid: 2e5db8f4b1b0b774dba1faca2d95973c,
         type: 3}
+      propertyPath: _red
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 636640197768117910, guid: 2e5db8f4b1b0b774dba1faca2d95973c,
+        type: 3}
+      propertyPath: _rank
+      value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 636640197768117910, guid: 2e5db8f4b1b0b774dba1faca2d95973c,
+        type: 3}
       propertyPath: _suit
       value: 3
       objectReference: {fileID: 0}

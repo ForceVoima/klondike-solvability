@@ -9,13 +9,18 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 636640197768117910, guid: 2e5db8f4b1b0b774dba1faca2d95973c,
         type: 3}
+      propertyPath: _rank
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 636640197768117910, guid: 2e5db8f4b1b0b774dba1faca2d95973c,
+        type: 3}
       propertyPath: _suit
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5249298046186069138, guid: 2e5db8f4b1b0b774dba1faca2d95973c,
         type: 3}
       propertyPath: m_Name
-      value: C4
+      value: C04
       objectReference: {fileID: 0}
     - target: {fileID: 5527597806052969443, guid: 2e5db8f4b1b0b774dba1faca2d95973c,
         type: 3}

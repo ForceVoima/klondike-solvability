@@ -17,9 +17,9 @@ namespace Klondike
         {
             base.OnInspectorGUI();
 
-            if (GUILayout.Button("Set spacing"))
+            if (GUILayout.Button("NewGame"))
             {
-                _master.SetSpacing();
+                _master.NewGame();
             }
         }
     }

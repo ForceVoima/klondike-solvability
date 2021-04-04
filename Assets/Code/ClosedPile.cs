@@ -38,18 +38,10 @@ namespace Klondike
             }
         }
 
-        public override void TakeCard(Card card)
+        public override void ReceiveCard(Card card)
         {
-            card.transform.SetParent(transform);
-
-            _pile[_numberOfCards] = card;
-            card.MoveTo(
-                position: _positions[_numberOfCards],
-                rotation: _rotation,
-                instant: true
-            );
-
-            _numberOfCards++;
+            card.ClosedCards( _pile, _numberOfCards );
+            base.ReceiveCard(card);
         }
     }
 }

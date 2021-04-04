@@ -54,6 +54,7 @@ namespace Klondike
 
             for (int i = 0; i < _pile.Length; i++)
             {
+                _pile[i].Reset();
                 array[i] = _pile[i];
                 _pile[i] = null;
             }
@@ -63,7 +64,7 @@ namespace Klondike
 
             for (int i = 0; i < _pile.Length; i++)
             {
-                random = Random.Range(0, _pile.Length - 1);
+                random = Random.Range(0, _pile.Length);
 
                 temp = array[random];
                 array[random] = array[i];
@@ -79,7 +80,7 @@ namespace Klondike
 
         public void DealCard(CardPile pile)
         {
-            pile.TakeCard( _pile[ _numberOfCards-1 ]);
+            pile.ReceiveCard( _pile[ _numberOfCards-1 ]);
             _pile[ _numberOfCards-1 ] = null;
             _numberOfCards--;
         }

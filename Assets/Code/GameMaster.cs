@@ -13,6 +13,10 @@ namespace Klondike
 
         [SerializeField] private ClosedPile[] _closedPiles;
 
+        public int _games = 0;
+
+        private bool _gameRunning = false;
+
         private void Awake()
         {
             _stock.Init();
@@ -21,8 +25,6 @@ namespace Klondike
             {
                 pile.Init();
             }
-
-            NewDeal();
         }
 
         private void NewDeal()
@@ -40,11 +42,34 @@ namespace Klondike
 
                 pile++;
             }
+
+            Statistics.Instance.SaveData();
         }
 
-        public void SetSpacing()
+        private void Reset()
         {
+            for(int i = 0; i < 7; i++)
+            {
+                _closedPiles[i].ResetCards( _stock );
+            }
+        }
 
+        public void NewGame()
+        {
+            Reset();
+            NewDeal();
+        }
+
+        private void Update()
+        {
+            if (_games < 1000)
+            {
+                NewGame();
+                _games++;
+
+                if (_games == 1000)
+                    Statistics.Instance.SaveToFile();
+            }
         }
     }
 }

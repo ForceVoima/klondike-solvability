@@ -21,8 +21,13 @@ namespace Klondike
             set { _rank = value; }
         }
 
-        private Vector3 _endPos;
-        private Quaternion _endRot;
+        [SerializeField] private bool _red;
+        public bool Red { get { return _red; } }
+
+        [SerializeField] private Card[] _blockedCards;
+
+        [SerializeField] private bool _suitBlocked = false;
+        [SerializeField] private int _solversBlocked = 0;
 
         public void MoveTo(Vector3 position, Quaternion rotation, bool instant)
         {
@@ -31,6 +36,37 @@ namespace Klondike
                 transform.position = position;
                 transform.rotation = rotation;
             }
+        }
+
+        public void ClosedCards(Card[] _cards, int numberOfCards)
+        {
+            _blockedCards = new Card[numberOfCards];
+
+            for (int i = 0; i < numberOfCards; i++)
+            {
+                _blockedCards[i] = _cards[i];
+
+                if ( _cards[i].Rank == (_rank + 1) &&
+                     _cards[i].Red == !_red )
+                {
+                    _solversBlocked++;
+                }
+
+                if ( _cards[i].Rank < _rank && 
+                     _cards[i].Suit == _suit )
+                {
+                    _suitBlocked = true;
+                }
+            }
+            
+            if (numberOfCards > 0)
+                Statistics.Instance.Report(this, _suitBlocked, _solversBlocked);
+        }
+
+        public void Reset()
+        {
+            _suitBlocked = false;
+            _solversBlocked = 0;
         }
     }
 }

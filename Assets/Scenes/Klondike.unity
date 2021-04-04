@@ -1082,6 +1082,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _type: 3
   _settings: {fileID: 1913795923}
+  _stats: {fileID: 1913795926}
   _pile: []
   _numberOfCards: 0
 --- !u!4 &346872733
@@ -2395,6 +2396,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _type: 3
   _settings: {fileID: 1913795923}
+  _stats: {fileID: 1913795926}
   _pile: []
   _numberOfCards: 0
 --- !u!4 &717707115
@@ -3874,6 +3876,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _type: 3
   _settings: {fileID: 1913795923}
+  _stats: {fileID: 1913795926}
   _pile: []
   _numberOfCards: 0
 --- !u!4 &1296393333
@@ -4603,6 +4606,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _type: 3
   _settings: {fileID: 1913795923}
+  _stats: {fileID: 1913795926}
   _pile: []
   _numberOfCards: 0
 --- !u!4 &1748648158
@@ -4807,6 +4811,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _type: 3
   _settings: {fileID: 1913795923}
+  _stats: {fileID: 1913795926}
   _pile: []
   _numberOfCards: 0
 --- !u!4 &1813014120
@@ -5060,6 +5065,7 @@ GameObject:
   - component: {fileID: 1913795924}
   - component: {fileID: 1913795925}
   - component: {fileID: 1913795923}
+  - component: {fileID: 1913795926}
   m_Layer: 0
   m_Name: GameMaster
   m_TagString: Untagged
@@ -5098,7 +5104,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1913795925
 MonoBehaviour:
@@ -5121,6 +5127,22 @@ MonoBehaviour:
   - {fileID: 2135123486}
   - {fileID: 717707114}
   - {fileID: 346872732}
+--- !u!114 &1913795926
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1913795922}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 365b0a043b480ff48b02f2a9be6ec5b5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _suits: 
+  _ranks: 
+  _blocks: 
+  _dataOut: []
 --- !u!1001 &1936893157
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5215,13 +5237,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1993166287}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -20.12, y: 0.5, z: 14.47}
+  m_LocalPosition: {x: -30, y: 0.5, z: 14.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 276856868}
   - {fileID: 2092774918}
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1993166289
 MonoBehaviour:
@@ -5237,6 +5259,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _type: 1
   _settings: {fileID: 1913795923}
+  _stats: {fileID: 0}
   _pile: []
   _numberOfCards: 0
   _cards: {fileID: 2092774917}
@@ -5428,6 +5451,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _type: 3
   _settings: {fileID: 1913795923}
+  _stats: {fileID: 1913795926}
   _pile: []
   _numberOfCards: 0
 --- !u!4 &2102169135
@@ -5557,6 +5581,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _type: 3
   _settings: {fileID: 1913795923}
+  _stats: {fileID: 1913795926}
   _pile: []
   _numberOfCards: 0
 --- !u!4 &2135123487
