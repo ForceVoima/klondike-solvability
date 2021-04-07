@@ -47,6 +47,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _suit: 4
+  _rank: 0
+  _red: 0
+  _parallel: {fileID: 0}
+  _solver1: {fileID: 0}
+  _solver2: {fileID: 0}
+  _blockedCards: []
+  _suitBlocked: 0
+  _solversBlocked: 0
+  _glowGO: {fileID: 8881380447507805277}
+  _renderer: {fileID: 3279095331902309958}
 --- !u!33 &5527597806052969443
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -111,7 +121,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &6695647328092581733
 Transform:
   m_ObjectHideFlags: 0
@@ -121,7 +131,7 @@ Transform:
   m_GameObject: {fileID: 8881380447507805277}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.05, y: 0.5, z: 1.04}
+  m_LocalScale: {x: 1.04, y: 0.5, z: 1.03}
   m_Children: []
   m_Father: {fileID: 6928648078671507108}
   m_RootOrder: 0
@@ -152,7 +162,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a61e717a637afe24fb604039b2feb9cb, type: 2}
+  - {fileID: 2100000, guid: 7f41acfb61cc5fb4a8f2927b05ff7fff, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

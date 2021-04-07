@@ -6,7 +6,8 @@ namespace Klondike
 {
     public class ClosedPile : CardPile
     {
-        // [Header("Closed Pile specific")]
+        [Header("Closed Pile specific")]
+        [SerializeField] private bool _mouseOver = false;
 
         public void Init()
         {
@@ -16,16 +17,16 @@ namespace Klondike
             _positions = new Vector3[7];
 
             _rotation = Quaternion.Euler(
-                x: - _settings.cardAngle,
+                x: -Settings.Instance.cardAngle,
                 y: 0f,
                 z: 0f
             );
 
             float x = transform.position.x;
             float y = transform.position.y +
-                      _settings.cardThickness +
-                      Mathf.Sin(Mathf.Deg2Rad * _settings.cardAngle) *
-                      _settings.cardHeight/2f;
+                      Settings.Instance.cardThickness +
+                      Mathf.Sin(Mathf.Deg2Rad * Settings.Instance.cardAngle) *
+                      Settings.Instance.cardHeight/2f;
             float z = transform.position.z;
 
             for (int i = 0; i < 7; i++)
@@ -34,7 +35,7 @@ namespace Klondike
                 _positions[i].y = y;
                 _positions[i].z = z;
 
-                z -= _settings.ClosedCardMinSpacing;
+                z -= Settings.Instance.ClosedCardMinSpacing;
             }
         }
 
@@ -42,6 +43,16 @@ namespace Klondike
         {
             card.ClosedCards( _pile, _numberOfCards );
             base.ReceiveCard(card);
+        }
+        
+        private void OnMouseEnter()
+        {
+            _mouseOver = true;
+        }
+
+        private void OnMouseExit()
+        {
+            _mouseOver = false;
         }
     }
 }

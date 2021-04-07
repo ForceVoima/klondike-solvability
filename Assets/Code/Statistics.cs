@@ -20,9 +20,9 @@ namespace Klondike
             get { return _instance; }
         }
 
-        public List<string> _dataOut;
+        private List<string> _dataOut;
 
-        private void Awake()
+        public void Init()
         {
             if ( _instance == null)
                 _instance = this;

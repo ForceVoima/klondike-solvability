@@ -22,4 +22,13 @@ namespace Klondike
         BuildPile,
         FoundationPile
     }
+
+    public enum Effect
+    {
+        Normal = 0,
+        SuitBlock = 1,
+        SolverBlock = 2,
+        Solvable = 3,
+        LowPriority = 4
+    }
 }

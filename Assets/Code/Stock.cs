@@ -9,8 +9,24 @@ namespace Klondike
         [Header("Stock specific")]
         [SerializeField] private GameObject _cards;
 
+        [SerializeField] private Card[] _allCards;
+        public static Stock _instance;
+        public static Stock Instance
+        {
+            get { return _instance; }
+        }
+
         public void Init()
         {
+            if ( _instance == null)
+                _instance = this;
+            else if (_instance != this)
+            {
+                Destroy(gameObject);
+                Debug.LogWarning("Destroying dublicate stock!");
+                return;
+            }
+
             _type = PileType.Stock;
 
             _positions = new Vector3[52];
@@ -21,14 +37,14 @@ namespace Klondike
 
             for (int i = 0; i < 52; i++)
             {
-                y += _settings.cardThickness;
+                y += Settings.Instance.cardThickness;
 
                 _positions[i].x = x;
                 _positions[i].y = y;
                 _positions[i].z = z;
             }
 
-            _rotation = _settings.faceDown;
+            _rotation = Settings.Instance.faceDown;
 
             InitCards();
         }
@@ -36,15 +52,22 @@ namespace Klondike
         private void InitCards()
         {
             _pile = GetComponentsInChildren<Card>();
+            _allCards = new Card[_pile.Length];
 
             for (int i = 0; i < _pile.Length; i++)
             {
+                _allCards[i] = _pile[i];
                 _pile[i].MoveTo(
                     position: _positions[i],
                     rotation: _rotation,
                     instant: true );
 
                 _numberOfCards++;
+            }
+
+            for (int i = 0; i < _pile.Length; i++)
+            {
+                _pile[i].Init();
             }
         }
 
@@ -78,11 +101,38 @@ namespace Klondike
             }
         }
 
-        public void DealCard(CardPile pile)
+        public void DealCardTo(CardPile pile, Suit suit, int rank)
         {
-            pile.ReceiveCard( _pile[ _numberOfCards-1 ]);
-            _pile[ _numberOfCards-1 ] = null;
+            int i = 0;
+
+            while (i < _pile.Length)
+            {
+                if ( _pile[i].Suit == suit && _pile[i].Rank == rank)
+                    break;
+                
+                i++;
+            }
+
+            pile.ReceiveCard( _pile[i]);
             _numberOfCards--;
+
+            while (i < _numberOfCards)
+            {
+                _pile[i] = _pile[i+1];
+                _pile[i].MoveTo(
+                    position: _positions[i],
+                    rotation: _rotation,
+                    instant: true
+                );
+                i++;
+            }
+
+            _pile[_numberOfCards] = null;
+        }
+
+        public Card RequestCard(Suit suit, int rank)
+        {
+            return _allCards[ (int)suit*13 + rank - 1 ];
         }
     }
 }

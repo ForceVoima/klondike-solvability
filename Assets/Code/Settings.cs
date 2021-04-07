@@ -22,6 +22,17 @@ namespace Klondike
             }
         }
 
+        public Material normal;
+        public Material suitBlock;
+        public Material solverBlock;
+        public Material lowPriority;
+
+        public static Settings _instance;
+        public static Settings Instance
+        {
+            get { return _instance; }
+        }
+
         public Quaternion faceUp = Quaternion.LookRotation(
                 forward: Vector3.forward,
                 upwards: Vector3.up);
@@ -29,5 +40,34 @@ namespace Klondike
         public Quaternion faceDown = Quaternion.LookRotation(
                 forward: Vector3.forward,
                 upwards: Vector3.down);
+
+        public void Init()
+        {
+            if ( _instance == null)
+                _instance = this;
+            else if (_instance != this)
+            {
+                Destroy(gameObject);
+                Debug.LogWarning("Destroying dublicate settings!");
+                return;
+            }
+        }
+
+        public Material GetHighlight(Effect code)
+        {
+            switch (code)
+            {
+                case Effect.Normal:
+                    return normal;
+                case Effect.SuitBlock:
+                    return suitBlock;
+                case Effect.SolverBlock:
+                    return solverBlock;
+                case Effect.LowPriority:
+                    return lowPriority;
+            }
+
+            return normal;
+        }
     }   
 }

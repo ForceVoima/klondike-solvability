@@ -21,6 +21,11 @@ namespace Klondike
             {
                 _master.NewGame();
             }
+
+            if (GUILayout.Button("Load custom game"))
+            {
+                _master.LoadCustomGame();
+            }
         }
     }
 }
