@@ -26,6 +26,11 @@ namespace Klondike
             {
                 _master.LoadCustomGame();
             }
+
+            if (GUILayout.Button("Win animation"))
+            {
+                _master.StartWinThrow();
+            }
         }
     }
 }

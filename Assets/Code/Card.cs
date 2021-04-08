@@ -35,7 +35,11 @@ namespace Klondike
 
         [SerializeField] private bool _suitBlocked = false;
         [SerializeField] private int _solversBlocked = 0;
+
+        [Header("Unity specific")]
         [SerializeField] private Renderer _renderer;
+        [SerializeField] private BoxCollider _boxCollider;
+        [SerializeField] private Rigidbody _rigidBody;
 
         public void Init()
         {
@@ -121,6 +125,8 @@ namespace Klondike
             _solversBlocked = 0;
             _blockedCards = null;
             Highlight( Effect.Normal );
+            _boxCollider.enabled = false;
+            _rigidBody.isKinematic = true;
         }
 
         public void Highlight(Effect code)
@@ -129,6 +135,17 @@ namespace Klondike
                 _renderer.material = Settings.Instance.GetHighlight( Effect.SolverBlock );
             else
                 _renderer.material = Settings.Instance.GetHighlight( code );
+        }
+
+        public void EnablePhysics()
+        {
+            _boxCollider.enabled = true;
+            _rigidBody.isKinematic = false;
+        }
+
+        public void ThrowCard(Vector3 impulse, ForceMode mode)
+        {
+            _rigidBody.AddForce(impulse, mode);
         }
     }
 }

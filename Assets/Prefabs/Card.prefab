@@ -12,6 +12,8 @@ GameObject:
   - component: {fileID: 636640197768117910}
   - component: {fileID: 5527597806052969443}
   - component: {fileID: 6339397070728386841}
+  - component: {fileID: 6088812059146223443}
+  - component: {fileID: 8030703980832425949}
   m_Layer: 0
   m_Name: Card
   m_TagString: Untagged
@@ -49,14 +51,16 @@ MonoBehaviour:
   _suit: 4
   _rank: 0
   _red: 0
+  _sequence: 0
   _parallel: {fileID: 0}
   _solver1: {fileID: 0}
   _solver2: {fileID: 0}
   _blockedCards: []
   _suitBlocked: 0
   _solversBlocked: 0
-  _glowGO: {fileID: 8881380447507805277}
   _renderer: {fileID: 3279095331902309958}
+  _boxCollider: {fileID: 6088812059146223443}
+  _rigidBody: {fileID: 8030703980832425949}
 --- !u!33 &5527597806052969443
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -104,6 +108,35 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+--- !u!65 &6088812059146223443
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5249298046186069138}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 0
+  serializedVersion: 2
+  m_Size: {x: 6.2328134, y: 0.05, z: 8.706154}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!54 &8030703980832425949
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5249298046186069138}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 1
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &8881380447507805277
 GameObject:
   m_ObjectHideFlags: 0

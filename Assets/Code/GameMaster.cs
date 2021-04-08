@@ -156,5 +156,26 @@ namespace Klondike
             else
                 rank = int.Parse( text.Substring(1) );
         }
+
+        public void StartWinThrow()
+        {
+            StartCoroutine( ThrowCardsWin() );
+        }
+
+        public IEnumerator ThrowCardsWin()
+        {
+            yield return new WaitForSeconds(0.5f);
+
+            int foundation = 0;
+
+            while ( foundation < 4 )
+            {
+                _foundations[foundation].StartWinThrow();
+                foundation++;
+                yield return new WaitForSeconds(0.25f);
+            }
+
+            yield return null;
+        }
     }
 }

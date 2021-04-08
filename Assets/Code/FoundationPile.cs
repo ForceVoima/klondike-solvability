@@ -53,5 +53,40 @@ namespace Klondike
             if ( _suit == Suit.NotSet )
                 _suit = card.Suit;
         }
+
+        public void StartWinThrow()
+        {
+            StartCoroutine( ThrowCardsWin() );
+        }
+
+        public IEnumerator ThrowCardsWin()
+        {
+            int cards = 13;
+            Vector3 impulse = new Vector3(0f, 20f, 0f);
+            Card card;
+            float angle;
+
+            while ( cards > 0 )
+            {
+                card = _pile[ cards-1 ];
+
+                angle = Random.Range( 200f, 300f );
+
+                impulse.x = Mathf.Cos( Mathf.Deg2Rad * angle ) * 30f;
+                impulse.z = Mathf.Sin( Mathf.Deg2Rad * angle ) * 30f;
+
+                card.EnablePhysics();
+
+                card.ThrowCard(
+                    impulse: impulse,
+                    mode: ForceMode.Impulse
+                 );
+                 cards--;
+
+                yield return new WaitForSeconds(1f);
+            }
+
+            yield return null;
+        }
     }
 }

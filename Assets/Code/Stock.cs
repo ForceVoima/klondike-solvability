@@ -8,8 +8,8 @@ namespace Klondike
     {
         [Header("Stock specific")]
         [SerializeField] private GameObject _cards;
-
         [SerializeField] private Card[] _allCards;
+        [SerializeField] private Settings _settings;
         public static Stock _instance;
         public static Stock Instance
         {
@@ -29,6 +29,8 @@ namespace Klondike
 
             _type = PileType.Stock;
 
+            _numberOfCards = 0;
+
             _positions = new Vector3[52];
 
             float x = transform.position.x;
@@ -37,14 +39,14 @@ namespace Klondike
 
             for (int i = 0; i < 52; i++)
             {
-                y += Settings.Instance.cardThickness;
+                y += _settings.cardThickness;
 
                 _positions[i].x = x;
                 _positions[i].y = y;
                 _positions[i].z = z;
             }
 
-            _rotation = Settings.Instance.faceDown;
+            _rotation = _settings.faceDown;
 
             InitCards();
         }
