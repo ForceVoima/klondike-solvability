@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Klondike
 {
-    public class Stock : CardPile
+    public class Stock : PlayerPile
     {
         [Header("Stock specific")]
         [SerializeField] private GameObject _cards;

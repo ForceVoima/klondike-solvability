@@ -6,36 +6,38 @@ using System.Text;
 
 namespace Klondike
 {
-    public class GameMaster : MonoBehaviour
+    public class GameMaster : Master
     {
-        [SerializeField] private Stock _stock;
-        [SerializeField] private WastePile _waste;
-
-        //Foundations
-
-        [SerializeField] private ClosedPile[] _closedPiles;
-
-        [SerializeField] private Statistics _stats;
-        [SerializeField] private Settings _settings;
-
+        [SerializeField] protected Statistics _stats;
+        [SerializeField] protected Settings _settings;
+        [SerializeField] protected Player _player;
         public int _games = 0;
 
         [SerializeField, Header("Custom game")] private string _gameFileName;
 
         private void Awake()
         {
+            Application.targetFrameRate = 100;
+
             _stats.Init();
             _settings.Init();
+            _player.Init();
 
             _stock.Init();
             _stock.Shuffle();
 
             _waste.Init();
 
-            foreach (ClosedPile pile in _closedPiles)
-            {
+            foreach (FoundationPile pile in _foundations)
                 pile.Init();
-            }
+
+            foreach (ClosedPile pile in _closedPiles)
+                pile.Init();
+
+            foreach (BuildPile pile in _buildPiles)
+                pile.Init();
+
+            NewGame();
         }
 
         private void NewDeal()
@@ -57,10 +59,14 @@ namespace Klondike
 
         private void Reset()
         {
-            for(int i = 0; i < 7; i++)
-            {
-                _closedPiles[i].ResetCards( _stock );
-            }
+            foreach (FoundationPile pile in _foundations)
+                pile.ResetCards( _stock );
+
+            foreach (ClosedPile pile in _closedPiles)
+                pile.ResetCards( _stock );
+
+            foreach (BuildPile pile in _buildPiles)
+                pile.ResetCards( _stock );
 
             _waste.ResetCards( _stock );
 
@@ -71,6 +77,9 @@ namespace Klondike
         {
             Reset();
             NewDeal();
+
+            foreach (BuildPile pile in _buildPiles)
+                pile.CheckEmpty();
         }
 
         /*
@@ -100,7 +109,7 @@ namespace Klondike
             Suit suit;
             int rank;
 
-            for (int i = 0; i < lines.Length; i++)
+            for (int i = 0; i < 7; i++)
             {
                 lineData = lines[i].Split('-');
 
@@ -115,6 +124,9 @@ namespace Klondike
                     );
                 }
             }
+
+            foreach (BuildPile pile in _buildPiles)
+                pile.CheckEmpty();
         }
 
         private void ReadCard(string text, out Suit suit, out int rank)

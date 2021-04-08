@@ -4,11 +4,11 @@ using UnityEngine;
 
 namespace Klondike
 {
-    public class WastePile : CardPile
+    public class WastePile : PlayerPile
     {
         [Header("Waste pile specific")]
         [SerializeField] private Stock _stock;
-        [SerializeField] private bool _mouseOver = false;
+
         public void Init()
         {
             _type = PileType.WasteHeap;
@@ -32,35 +32,25 @@ namespace Klondike
             _rotation = Settings.Instance.faceUp;
         }
 
-        private void Update()
+        public override void ReceiveCard(Card card)
         {
-            if ( _mouseOver )
-            {
-                if ( Input.GetAxis("Mouse ScrollWheel") > 0f )
-                    NextCardAction( strong: false );
-                else if ( Input.GetAxis("Mouse ScrollWheel") < 0f )
-                    PreviousCardAction();
-            }            
-        }
+            float random = Random.Range(-15f, 15f);
+            Vector3 offset = new Vector3(
+               Random.Range(-0.5f, 0.5f),
+               0f,
+               Random.Range(-0.5f, 0.5f) 
+            );
 
-        private void OnMouseUpAsButton()
-        {
-            NextCardAction( true );
-        }
+            card.transform.SetParent(transform);
 
-        private void OnMouseDown()
-        {
-            Debug.Log("Dragging from " + name);
-        }
+            _pile[_numberOfCards] = card;
+            card.MoveTo(
+                position: _positions[_numberOfCards] + offset,
+                rotation: Quaternion.Euler(0f, random, 0f),
+                instant: true
+            );
 
-        private void OnMouseEnter()
-        {
-            _mouseOver = true;
-        }
-
-        private void OnMouseExit()
-        {
-            _mouseOver = false;
+            _numberOfCards++;
         }
 
         public void NextCardAction(bool strong)

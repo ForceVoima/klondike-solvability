@@ -31,4 +31,11 @@ namespace Klondike
         Solvable = 3,
         LowPriority = 4
     }
+
+    public enum Track
+    {
+        Empty,
+        RedOddBlackEven,
+        BlackOddRedEven
+    }
 }

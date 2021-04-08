@@ -13,12 +13,19 @@ namespace Klondike
         public float cardAngle = 2f;
 
         [SerializeField] private float closedCardMinSpacing = 15f;
-
         public float ClosedCardMinSpacing
         {
             get
             {
                 return cardHeight * closedCardMinSpacing / 100f;
+            }
+        }
+        [SerializeField] private float buildCardMaxSpacing = 30f;
+        public float BuildCardMaxPacing
+        {
+            get
+            {
+                return cardHeight * buildCardMaxSpacing / 100f;
             }
         }
 

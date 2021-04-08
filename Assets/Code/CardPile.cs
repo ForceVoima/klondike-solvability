@@ -15,6 +15,15 @@ namespace Klondike
         public int NumberOfCards { get { return _numberOfCards; } }
         protected Vector3[] _positions;
         protected Quaternion _rotation;
+        public Card TopCard {
+        get
+        {
+            if ( _numberOfCards > 0 )
+                return _pile[ _numberOfCards-1 ];
+            else
+                return null;
+            }
+        }
 
         public virtual void ReceiveCard(Card card)
         {
@@ -29,7 +38,7 @@ namespace Klondike
 
             _numberOfCards++;
         }
-        public void DealTopCard(CardPile pile)
+        public virtual void DealTopCard(CardPile pile)
         {
             pile.ReceiveCard( _pile[ _numberOfCards-1 ]);
             _pile[ _numberOfCards-1 ] = null;

@@ -24,6 +24,9 @@ namespace Klondike
         [SerializeField] private bool _red;
         public bool Red { get { return _red; } }
 
+        [SerializeField] private Track _sequence;
+        public Track Track { get { return _sequence; } }
+
         [SerializeField] private Card _parallel, _solver1, _solver2;
 
         public Card Parallel { get { return _parallel; } }
@@ -49,6 +52,11 @@ namespace Klondike
                     _solver2 = Stock.Instance.RequestCard(Suit.Diamond, _rank + 1);
                 }
             }
+
+            if ( ( _red && _rank % 2 == 0 ) || ( !_red && _rank % 2 == 1 ) )
+                _sequence = Track.BlackOddRedEven;
+            else
+                _sequence = Track.RedOddBlackEven;
 
             switch (_suit)
             {
@@ -99,7 +107,7 @@ namespace Klondike
                      _cards[i].Suit == _suit )
                 {
                     _suitBlocked = true;
-                    Highlight( Effect.SuitBlock );
+                    // Highlight( Effect.SuitBlock );
                 }
             }
             
@@ -119,8 +127,6 @@ namespace Klondike
         {
             if ( _solversBlocked > 0 )
                 _renderer.material = Settings.Instance.GetHighlight( Effect.SolverBlock );
-            else if ( _suitBlocked )
-                _renderer.material = Settings.Instance.GetHighlight( Effect.SuitBlock );
             else
                 _renderer.material = Settings.Instance.GetHighlight( code );
         }

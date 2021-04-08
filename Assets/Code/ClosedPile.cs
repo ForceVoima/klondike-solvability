@@ -6,8 +6,8 @@ namespace Klondike
 {
     public class ClosedPile : CardPile
     {
-        [Header("Closed Pile specific")]
-        [SerializeField] private bool _mouseOver = false;
+        [Header("Closed pile specific")]
+        [SerializeField] private BuildPile _build;
 
         public void Init()
         {
@@ -44,15 +44,11 @@ namespace Klondike
             card.ClosedCards( _pile, _numberOfCards );
             base.ReceiveCard(card);
         }
-        
-        private void OnMouseEnter()
-        {
-            _mouseOver = true;
-        }
 
-        private void OnMouseExit()
+        public override void DealTopCard(CardPile pile)
         {
-            _mouseOver = false;
+            base.DealTopCard(pile);
+            _build.transform.position = _positions[ _numberOfCards ];
         }
     }
 }
