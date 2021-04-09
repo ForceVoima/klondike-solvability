@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 using System.Text;
+using UnityEditor;
 
 namespace Klondike
 {
@@ -11,12 +12,34 @@ namespace Klondike
         [SerializeField] protected Statistics _stats;
         [SerializeField] protected Settings _settings;
         [SerializeField] protected Player _player;
-        public int _games = 0;
 
         [SerializeField, Header("Custom game")] private string _gameFileName;
 
+        public int _cardsInFoundation = 0;
+
+        [SerializeField] private GameObject _mainCamera, _winCamera;
+
+        [SerializeField] private KlondikeGame _currentGame;
+
+        public GameDatabase _database;
+
+        public static GameMaster _instance;
+        public static GameMaster Instance
+        {
+            get { return _instance; }
+        }
+
         private void Awake()
         {
+            if ( _instance == null)
+                _instance = this;
+            else if (_instance != this)
+            {
+                Destroy(gameObject);
+                Debug.LogWarning("Destroying dublicate GameMaster!");
+                return;
+            }
+
             Application.targetFrameRate = 100;
 
             _stats.Init();
@@ -37,7 +60,8 @@ namespace Klondike
             foreach (BuildPile pile in _buildPiles)
                 pile.Init();
 
-            NewGame();
+            LoadJson();
+            // LoadCustomGame();
         }
 
         private void NewDeal()
@@ -55,6 +79,15 @@ namespace Klondike
 
                 pile++;
             }
+
+            _currentGame = new KlondikeGame( _database.allGames.Count + 1 );
+
+            for (int i = 0; i < _closedPiles.Length; i++)
+            {
+                _currentGame.piles[i] = _closedPiles[i].ToString();
+            }
+
+            _currentGame.piles[7] = _stock.ToString();
         }
 
         private void Reset()
@@ -69,32 +102,27 @@ namespace Klondike
                 pile.ResetCards( _stock );
 
             _waste.ResetCards( _stock );
+            
+            _stock.ResetCards();
 
             Statistics.Instance.SaveData();
+            _cardsInFoundation = 0;
+            StopAllCoroutines();
+            _mainCamera.SetActive(true);
+            _winCamera.SetActive(false);
         }
 
         public void NewGame()
         {
+            if ( _currentGame.gameID != 0 && !_database.allGames.Contains(_currentGame) )
+                _database.allGames.Add( _currentGame );
+
             Reset();
             NewDeal();
 
             foreach (BuildPile pile in _buildPiles)
                 pile.CheckEmpty();
         }
-
-        /*
-        private void Update()
-        {
-            if (_games < 1)
-            {
-                NewGame();
-                _games++;
-
-                //if (_games == 100000)
-                //    Statistics.Instance.SaveToFile();
-            }
-        }
-        */
 
         public void LoadCustomGame()
         {
@@ -104,6 +132,19 @@ namespace Klondike
 
             string allText = File.ReadAllText(path);
             string[] lines = allText.Split("\n"[0]);
+
+            _currentGame.piles = lines;
+            LoadGame(lines);
+        }
+
+        public void Restart()
+        {
+            Reset();
+            LoadGame( _currentGame.piles );
+        }
+
+        private void LoadGame(string[] lines)
+        {
             string[] lineData;
 
             Suit suit;
@@ -122,6 +163,18 @@ namespace Klondike
                         suit: suit,
                         rank: rank
                     );
+                }
+            }
+
+            if ( lines.Length >= 8 )
+            {
+                lineData = lines[7].Split('-');
+
+                for (int j = 0; j < lineData.Length; j++)
+                {
+                    ReadCard( lineData[j], out suit, out rank);
+
+                    _stock.OrderCard( suit, rank, j );
                 }
             }
 
@@ -157,7 +210,7 @@ namespace Klondike
                 rank = int.Parse( text.Substring(1) );
         }
 
-        public void StartWinThrow()
+        public void DeclareWin()
         {
             StartCoroutine( ThrowCardsWin() );
         }
@@ -165,6 +218,9 @@ namespace Klondike
         public IEnumerator ThrowCardsWin()
         {
             yield return new WaitForSeconds(0.5f);
+            
+            _mainCamera.SetActive(false);
+            _winCamera.SetActive(true);
 
             int foundation = 0;
 
@@ -175,7 +231,70 @@ namespace Klondike
                 yield return new WaitForSeconds(0.25f);
             }
 
+            yield return new WaitForSeconds(30f);
+            NewGame();
             yield return null;
+        }
+
+        public void FoundationAddedCard()
+        {
+            _cardsInFoundation++;
+
+            if ( _cardsInFoundation == 52 )
+                DeclareWin();
+        }
+
+        public void FoundationTakenCard()
+        {
+            _cardsInFoundation--;
+        }
+
+        public void SaveJson()
+        {
+            string content;
+
+            // The target file path e.g.
+        #if UNITY_EDITOR
+            var folder = Application.streamingAssetsPath;
+
+            if(! Directory.Exists(folder) )
+                Directory.CreateDirectory(folder);
+        #else
+            var folder = Application.persistentDataPath;
+        #endif
+
+            var filePath = Path.Combine(folder, "database.json");
+
+            if ( File.Exists(filePath))
+                File.Delete(filePath);
+
+            content = JsonUtility.ToJson(
+                obj: _database,
+                prettyPrint: true
+            );
+    
+            File.WriteAllText(filePath, content);
+
+        #if UNITY_EDITOR
+            AssetDatabase.Refresh();
+        #endif
+        }
+
+        public void LoadJson()
+        {
+            string path = Path.Combine( Application.streamingAssetsPath, "database.json");
+
+            if ( !File.Exists(path) )
+            {                
+                _database = new GameDatabase();
+                return;
+            }
+
+            string allText = File.ReadAllText(path);
+            _database = new GameDatabase();
+            JsonUtility.FromJsonOverwrite( allText, _database );
+
+            _currentGame = _database.allGames[ _database.allGames.Count - 1 ];
         }
     }
 }

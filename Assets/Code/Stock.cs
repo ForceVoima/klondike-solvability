@@ -62,7 +62,9 @@ namespace Klondike
                 _pile[i].MoveTo(
                     position: _positions[i],
                     rotation: _rotation,
-                    instant: true );
+                    instant: true,
+                    pile: _type
+                );
 
                 _numberOfCards++;
             }
@@ -98,12 +100,57 @@ namespace Klondike
 
             for (int i = 0; i < array.Length; i++)
             {
-                array[i].MoveTo( _positions[i], _rotation, true);
+                array[i].MoveTo(
+                    position: _positions[i],
+                    rotation: _rotation,
+                    instant: true,
+                    pile: _type
+                );
                 _pile[i] = array[i];
             }
         }
 
+        public void ResetCards()
+        {
+            for (int i = 0; i < _pile.Length; i++)
+            {
+                _pile[i].Reset();
+            }
+        }
+        
         public void DealCardTo(CardPile pile, Suit suit, int rank)
+        {
+            int i = IndexOf(suit, rank);
+
+            pile.ReceiveCard( _pile[i]);
+            _numberOfCards--;
+
+            while (i < _numberOfCards)
+            {
+                _pile[i] = _pile[i+1];
+                _pile[i].MoveTo(
+                    position: _positions[i],
+                    rotation: _rotation,
+                    instant: true,
+                    pile: _type
+                );
+                i++;
+            }
+
+            _pile[_numberOfCards] = null;
+        }
+
+        public void OrderCard(Suit suit, int rank, int order)
+        {
+            int cardSlot = IndexOf(suit, rank);
+            int targetSlot = (_numberOfCards - 1) - order;
+
+            Card temp = _pile[ targetSlot ];
+            _pile[ targetSlot ] = _pile[ cardSlot ];
+            _pile[ cardSlot ] = temp;
+        }
+
+        private int IndexOf(Suit suit, int rank)
         {
             int i = 0;
 
@@ -115,21 +162,7 @@ namespace Klondike
                 i++;
             }
 
-            pile.ReceiveCard( _pile[i]);
-            _numberOfCards--;
-
-            while (i < _numberOfCards)
-            {
-                _pile[i] = _pile[i+1];
-                _pile[i].MoveTo(
-                    position: _positions[i],
-                    rotation: _rotation,
-                    instant: true
-                );
-                i++;
-            }
-
-            _pile[_numberOfCards] = null;
+            return i;
         }
 
         public Card RequestCard(Suit suit, int rank)

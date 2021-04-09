@@ -45,7 +45,8 @@ namespace Klondike
             card.MoveTo(
                 position: transform.position + _positions[_numberOfCards],
                 rotation: _rotation,
-                instant: true
+                instant: true,
+                pile: _type
             );
 
             _numberOfCards++;

@@ -38,4 +38,11 @@ namespace Klondike
         RedOddBlackEven,
         BlackOddRedEven
     }
+    
+    public enum CardStatus
+    {
+        Closed,
+        Open,
+        Blocked
+    }
 }

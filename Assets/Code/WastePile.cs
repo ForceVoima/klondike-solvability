@@ -47,7 +47,8 @@ namespace Klondike
             card.MoveTo(
                 position: _positions[_numberOfCards] + offset,
                 rotation: Quaternion.Euler(0f, random, 0f),
-                instant: true
+                instant: true,
+                pile: _type
             );
 
             _numberOfCards++;

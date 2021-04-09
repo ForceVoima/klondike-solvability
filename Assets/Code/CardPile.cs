@@ -1,14 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Text;
 
 namespace Klondike
 {
     public class CardPile : MonoBehaviour
     {
         [SerializeField] protected PileType _type = PileType.NotSet;
-
-        public PileType Type { get { return _type; } }
         [SerializeField] protected Card[] _pile;
         [SerializeField, Range(0,52)] protected int _numberOfCards;
 
@@ -33,7 +32,8 @@ namespace Klondike
             card.MoveTo(
                 position: _positions[_numberOfCards],
                 rotation: _rotation,
-                instant: true
+                instant: true,
+                pile: _type
             );
 
             _numberOfCards++;
@@ -54,6 +54,25 @@ namespace Klondike
             }
 
             _numberOfCards = 0;
+        }
+
+        public override string ToString()
+        {
+            int i = 1;
+            StringBuilder sb = new StringBuilder();
+
+            if ( _numberOfCards > 0 )
+            {
+                sb.Append( _pile[0].ToString() );
+            }
+
+            while ( i < _numberOfCards )
+            {
+                sb.Append("-").Append( _pile[i].ToString() );
+                i++;
+            }
+
+            return sb.ToString();
         }
     }
 }

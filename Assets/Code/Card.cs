@@ -24,10 +24,13 @@ namespace Klondike
         [SerializeField] private bool _red;
         public bool Red { get { return _red; } }
 
-        [SerializeField] private Track _sequence;
+        [SerializeField] private CardStatus _status = CardStatus.Open;
+        private Effect _currentEffect = Effect.Normal;
+
+        private Track _sequence;
         public Track Track { get { return _sequence; } }
 
-        [SerializeField] private Card _parallel, _solver1, _solver2;
+        private Card _parallel, _solver1, _solver2;
 
         public Card Parallel { get { return _parallel; } }
 
@@ -79,13 +82,15 @@ namespace Klondike
             }
         }
 
-        public void MoveTo(Vector3 position, Quaternion rotation, bool instant)
+        public void MoveTo(Vector3 position, Quaternion rotation, bool instant, PileType pile)
         {
             if (instant)
             {
                 transform.position = position;
                 transform.rotation = rotation;
             }
+
+            StatusCheck( pile );
         }
 
         public void ClosedCards(Card[] _cards, int numberOfCards)
@@ -100,8 +105,6 @@ namespace Klondike
                      _cards[i].Rank == (_rank + 1) &&
                      _cards[i].Red == !_red )
                 {
-                    _cards[i].Highlight(Effect.SolverBlock);
-                    _cards[i].Parallel.Highlight(Effect.SolverBlock);
                     _parallel.Highlight(Effect.LowPriority);
                     _solversBlocked++;
                     Highlight( Effect.SolverBlock );
@@ -111,7 +114,6 @@ namespace Klondike
                      _cards[i].Suit == _suit )
                 {
                     _suitBlocked = true;
-                    // Highlight( Effect.SuitBlock );
                 }
             }
             
@@ -131,10 +133,8 @@ namespace Klondike
 
         public void Highlight(Effect code)
         {
-            if ( _solversBlocked > 0 )
-                _renderer.material = Settings.Instance.GetHighlight( Effect.SolverBlock );
-            else
-                _renderer.material = Settings.Instance.GetHighlight( code );
+            _renderer.material = Settings.Instance.GetHighlight( code );
+            _currentEffect = code;
         }
 
         public void EnablePhysics()
@@ -143,9 +143,50 @@ namespace Klondike
             _rigidBody.isKinematic = false;
         }
 
-        public void ThrowCard(Vector3 impulse, ForceMode mode)
+        public void ThrowCard(Vector3 impulse, ForceMode mode, Vector3 torque)
         {
             _rigidBody.AddForce(impulse, mode);
+            _rigidBody.AddTorque(torque, mode);
+        }
+
+        public override string ToString()
+        {
+            string suit = "";
+
+            if ( _suit == Suit.Club )
+                suit = "C";
+            if ( _suit == Suit.Spade )
+                suit = "S";
+            if ( _suit == Suit.Heart )
+                suit = "H";
+            if ( _suit == Suit.Diamond )
+                suit = "D";
+
+            return string.Concat( suit, Rank.ToString() );
+        }
+
+        private void StatusCheck(PileType pile)
+        {
+            if ( ( _currentEffect == Effect.LowPriority ||
+                   _currentEffect == Effect.SolverBlock ) &&
+                   _status != CardStatus.Closed &&
+                   pile != PileType.ClosedPile )
+            {
+                _solversBlocked = 0;
+                _suitBlocked = false;
+                _blockedCards = null;
+                Highlight( Effect.Normal );
+            }
+
+            if ( pile == PileType.ClosedPile )
+            {
+                _status = CardStatus.Closed;
+            }
+
+            else if ( _status != CardStatus.Open )
+            {
+                _status = CardStatus.Open;
+            }
         }
     }
 }

@@ -31,13 +31,16 @@ namespace Klondike
 
             _rotation = Settings.Instance.faceUp;
         }
+        public override void ResetCards(Stock stock)
+        {
+            base.ResetCards(stock);
+            StopAllCoroutines();
+        }
+
         public override bool AcceptsCard(Card card)
         {
-            if ( _suit == Suit.NotSet &&
-                 card.Rank == 1 )
-            {
+            if ( _suit == Suit.NotSet && card.Rank == 1 )
                 return true;
-            }
 
             else if ( card.Suit == _suit && card.Rank == _numberOfCards + 1 )
                 return true;
@@ -52,6 +55,14 @@ namespace Klondike
 
             if ( _suit == Suit.NotSet )
                 _suit = card.Suit;
+
+            GameMaster.Instance.FoundationAddedCard();
+        }
+
+        public override void DealTopCard(CardPile pile)
+        {
+            base.DealTopCard(pile);
+            GameMaster.Instance.FoundationTakenCard();
         }
 
         public void StartWinThrow()
@@ -63,6 +74,7 @@ namespace Klondike
         {
             int cards = 13;
             Vector3 impulse = new Vector3(0f, 20f, 0f);
+            Vector3 torque = new Vector3();
             Card card;
             float angle;
 
@@ -71,6 +83,8 @@ namespace Klondike
                 card = _pile[ cards-1 ];
 
                 angle = Random.Range( 200f, 300f );
+                torque.x = Random.Range( 0f, 20f );
+                torque.z = Random.Range( 0f, 20f );
 
                 impulse.x = Mathf.Cos( Mathf.Deg2Rad * angle ) * 30f;
                 impulse.z = Mathf.Sin( Mathf.Deg2Rad * angle ) * 30f;
@@ -79,9 +93,11 @@ namespace Klondike
 
                 card.ThrowCard(
                     impulse: impulse,
-                    mode: ForceMode.Impulse
-                 );
-                 cards--;
+                    mode: ForceMode.Impulse,
+                    torque: torque
+                );
+                 
+                cards--;
 
                 yield return new WaitForSeconds(1f);
             }

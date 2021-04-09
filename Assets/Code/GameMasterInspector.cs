@@ -27,9 +27,14 @@ namespace Klondike
                 _master.LoadCustomGame();
             }
 
-            if (GUILayout.Button("Win animation"))
+            if (GUILayout.Button("Restart"))
             {
-                _master.StartWinThrow();
+                _master.Restart();
+            }
+
+            if (GUILayout.Button("Save JSON"))
+            {
+                _master.SaveJson();
             }
         }
     }

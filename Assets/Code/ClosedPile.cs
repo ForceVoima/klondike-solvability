@@ -17,7 +17,7 @@ namespace Klondike
             _positions = new Vector3[7];
 
             _rotation = Quaternion.Euler(
-                x: -Settings.Instance.cardAngle,
+                x: -180f-Settings.Instance.cardAngle,
                 y: 0f,
                 z: 0f
             );
