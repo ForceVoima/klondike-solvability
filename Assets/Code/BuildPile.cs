@@ -50,6 +50,7 @@ namespace Klondike
                 rotation: _rotation,
                 instant: true,
                 pile: _type,
+                parent: this,
                 moveCardGroup: moveCardGroup
             );
 

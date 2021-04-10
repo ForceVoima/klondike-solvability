@@ -46,10 +46,10 @@ namespace Klondike
             _stats.Init();
             _settings.Init();
             _player.Init();
-            _ai.Init();
 
             _stock.Init();
             _stock.Shuffle();
+            _ai.Init();
 
             _waste.Init();
 

@@ -12,6 +12,8 @@ namespace Klondike
             get { return _instance; }
         }
 
+        [SerializeField] private AIMaster _ai;
+
         [SerializeField] private bool _mouseDown = false;
         [SerializeField] private float _mouseDownTimer = 0f, _betweenClicks = 0f;
 
@@ -111,15 +113,8 @@ namespace Klondike
 
             if ( card == null )
                 return;
-
-            foreach (FoundationPile pile in _foundations)
-            {
-                if ( pile.AcceptsCard( card ) )
-                {
-                    _mouseOverPile.DealTopCard( pile );
-                    return;
-                }
-            }
+            
+            _ai.SolveUntil( card );
         }
 
         private void MouseWheelInputs()

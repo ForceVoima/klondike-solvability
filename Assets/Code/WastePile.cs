@@ -48,10 +48,41 @@ namespace Klondike
                 position: _positions[_numberOfCards] + offset,
                 rotation: Quaternion.Euler(0f, random, 0f),
                 instant: true,
-                pile: _type
+                pile: _type,
+                parent: this
             );
 
             _numberOfCards++;
+        }
+        
+        public override void DealCardTo(CardPile pile, Suit suit, int rank)
+        {
+            int i = IndexOf(suit, rank);
+
+            pile.ReceiveCard( _pile[i] );
+            _numberOfCards--;
+
+            Vector3 currentPos;
+            Quaternion currentRot;
+
+            while (i < _numberOfCards)
+            {
+                _pile[i] = _pile[i+1];
+                currentPos = _pile[i].transform.position;
+                currentPos.y = _positions[i].y;
+                currentRot = _pile[i].transform.rotation;
+
+                _pile[i].MoveTo(
+                    position: currentPos,
+                    rotation: currentRot,
+                    instant: true,
+                    pile: _type,
+                    parent: this
+                );
+                i++;
+            }
+
+            _pile[_numberOfCards] = null;
         }
 
         public void NextCardAction(bool strong)

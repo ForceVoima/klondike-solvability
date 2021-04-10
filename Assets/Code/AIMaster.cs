@@ -6,9 +6,9 @@ namespace Klondike
 {
     public class AIMaster : Master
     {
-        public bool[] _openCards;
-
         [SerializeField] private int[] _foundationStatus;
+
+        [SerializeField] private Card[] _foundationCards;
 
         private static AIMaster _instance;
         public static AIMaster Instance
@@ -27,37 +27,36 @@ namespace Klondike
                 return;
             }
 
-            _openCards = new bool[52];
             _foundationStatus = new int[4];
+            _foundationCards = new Card[4];
+
+            for (int i = 0; i < 4; i++)
+            {
+                _foundationCards[i] = _stock.RequestCard( (Suit)i, 1 );
+            }
         }
 
         public void Reset()
         {
-            for (int i = 0; i < _openCards.Length; i++)
-            {
-                _openCards[i] = true;
-            }
-
             for (int i = 0; i < 4; i++)
             {
                 _foundationStatus[i] = 0;
+                _foundationCards[i] = _stock.RequestCard( (Suit)i, 1 );
             }
-        }
-
-        public void ClosedCard(Suit suit, int rank)
-        {
-            _openCards[ (int)suit*13 + rank - 1 ] = false;
         }
 
         public void OpenedCard(Suit suit, int rank)
         {
-            _openCards[ (int)suit*13 + rank - 1 ] = true;
-                HighlightSolvableInSuit( (int)suit );
+            HighlightSolvableInSuit( (int)suit );
         }
 
         public void CardFounded(Suit suit, int rank)
         {
             _foundationStatus[(int)suit] = rank;
+
+            if ( rank < 13 )
+                _foundationCards[ (int)suit ] = _stock.RequestCard( suit, rank+1 );
+
             HighlightSolvableInSuit( (int)suit );
         }
 
@@ -74,18 +73,72 @@ namespace Klondike
 
         private void HighlightSolvableInSuit(int suit)
         {
-            int rank = 0;
+            _foundationCards[ suit ].RecursiveSolvable( true );
+        }
 
-            rank = _foundationStatus[suit];
-
-            if ( rank == 0 && !_openCards[ suit*13 ] || rank == 13 )
-            {
-                suit++;
-                return;
-            }
+        public void SolveAll()
+        {
+            int suit = 0;
+            int solved = 1;
             
-            rank++;
-            _stock.RequestCard( (Suit)suit, rank ).RecursiveSolvable( true );
+            while (solved > 0)
+            {
+                suit = 0;
+                solved = 0;
+
+                while (suit < 4)
+                {
+                    solved += SolveSuit( suit );
+                    suit++;
+                }
+            }
+        }
+
+        private int SolveSuit(int suit)
+        {
+            if ( !_foundationCards[ suit ].Solvable )
+                return 0;
+
+            Card card = _foundationCards[ suit ];
+
+            return SolveCard( card );
+        }
+
+        private int SolveCard(Card card)
+        {
+            CardPile pile = card.Parent;
+            PileType type = pile.Type;
+
+            int i = 0;
+
+            while (i < 4)
+            {
+                if ( _foundations[ i ].AcceptsCard( card ))
+                    break;
+                else
+                    i++;
+            }
+
+            if ( type == PileType.Stock || type == PileType.WasteHeap )
+                pile.DealCardTo( _foundations[i], card.Suit, card.Rank );
+            else
+                pile.DealTopCard( _foundations[i] );
+
+            return 1;
+        }
+
+        public void SolveUntil(Card card)
+        {
+            int solved = 1;
+            int rank = card.Rank;
+            
+            while ( solved > 0 )
+            {
+                solved = SolveSuit( (int)card.Suit );
+
+                if ( _foundationStatus[ (int)card.Suit ] == rank )
+                    break;
+            }
         }
     }
 }

@@ -25,7 +25,10 @@ namespace Klondike
         public bool Red { get { return _red; } }
 
         [SerializeField] private CardStatus _status = CardStatus.Open;
+        public bool Solvable { get { return _status == CardStatus.Open; } }
         private Effect _currentEffect = Effect.Normal;
+        private CardPile _parent;
+        public CardPile Parent { get { return _parent; } }
 
         private Track _sequence;
         public Track Track { get { return _sequence; } }
@@ -91,13 +94,20 @@ namespace Klondike
             }
         }
 
-        public void MoveTo(Vector3 position, Quaternion rotation, bool instant, PileType pile, bool moveCardGroup = false)
+        public void MoveTo(Vector3 position,
+                           Quaternion rotation,
+                           bool instant,
+                           PileType pile,
+                           CardPile parent,
+                           bool moveCardGroup = false)
         {
             if (instant)
             {
                 transform.position = position;
                 transform.rotation = rotation;
             }
+
+            _parent = parent;
 
             if ( !moveCardGroup )
                 StatusCheck( pile );
@@ -197,7 +207,6 @@ namespace Klondike
             else if ( pile == PileType.ClosedPile )
             {
                 _status = CardStatus.Closed;
-                AIMaster.Instance.ClosedCard( _suit, _rank );
                 _cardRenderer.material.SetColor("_Color", Settings.Instance.closed);
             }
 
@@ -213,8 +222,6 @@ namespace Klondike
         {
             _status = CardStatus.Blocked;
             above = byCard;
-            AIMaster.Instance.ClosedCard(_suit, _rank);
-            
             RecursiveSolvable( false );
         }
 

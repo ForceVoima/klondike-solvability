@@ -63,7 +63,8 @@ namespace Klondike
                     position: _positions[i],
                     rotation: _rotation,
                     instant: true,
-                    pile: _type
+                    pile: _type,
+                    parent: this
                 );
 
                 _numberOfCards++;
@@ -104,7 +105,8 @@ namespace Klondike
                     position: _positions[i],
                     rotation: _rotation,
                     instant: true,
-                    pile: _type
+                    pile: _type,
+                    parent: this
                 );
                 _pile[i] = array[i];
             }
@@ -118,11 +120,11 @@ namespace Klondike
             }
         }
         
-        public void DealCardTo(CardPile pile, Suit suit, int rank)
+        public override void DealCardTo(CardPile pile, Suit suit, int rank)
         {
             int i = IndexOf(suit, rank);
 
-            pile.ReceiveCard( _pile[i]);
+            pile.ReceiveCard( _pile[i] );
             _numberOfCards--;
 
             while (i < _numberOfCards)
@@ -132,6 +134,7 @@ namespace Klondike
                     position: _positions[i],
                     rotation: _rotation,
                     instant: true,
+                    parent: this,
                     pile: _type
                 );
                 i++;
@@ -148,21 +151,6 @@ namespace Klondike
             Card temp = _pile[ targetSlot ];
             _pile[ targetSlot ] = _pile[ cardSlot ];
             _pile[ cardSlot ] = temp;
-        }
-
-        private int IndexOf(Suit suit, int rank)
-        {
-            int i = 0;
-
-            while (i < _pile.Length)
-            {
-                if ( _pile[i].Suit == suit && _pile[i].Rank == rank)
-                    break;
-                
-                i++;
-            }
-
-            return i;
         }
 
         public Card RequestCard(Suit suit, int rank)

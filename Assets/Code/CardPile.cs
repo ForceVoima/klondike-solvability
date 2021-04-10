@@ -8,6 +8,7 @@ namespace Klondike
     public class CardPile : MonoBehaviour
     {
         [SerializeField] protected PileType _type = PileType.NotSet;
+        public PileType Type { get { return _type; } }
         [SerializeField] protected Card[] _pile;
         [SerializeField, Range(0,52)] protected int _numberOfCards;
 
@@ -34,6 +35,7 @@ namespace Klondike
                 rotation: _rotation,
                 instant: true,
                 pile: _type,
+                parent: this,
                 moveCardGroup: moveCardGroup
             );
 
@@ -74,6 +76,31 @@ namespace Klondike
             }
 
             return sb.ToString();
+        }
+
+        public bool Contains(Card card)
+        {
+            int i = IndexOf( card.Suit, card.Rank );
+            return i != -1;
+        }
+
+        protected int IndexOf(Suit suit, int rank)
+        {
+            int i = 0;
+
+            while (i < _pile.Length)
+            {
+                if ( _pile[i].Suit == suit && _pile[i].Rank == rank)
+                    return i;
+                
+                i++;
+            }
+
+            return -1;
+        }
+
+        public virtual void DealCardTo(CardPile pile, Suit suit, int rank)
+        {
         }
     }
 }
