@@ -42,7 +42,8 @@ namespace Klondike
         [SerializeField] private int _solversBlocked = 0;
 
         [Header("Unity specific")]
-        [SerializeField] private Renderer _renderer;
+        [SerializeField] private Renderer _cardRenderer;
+        [SerializeField] private Renderer _outlineRenderer;
         [SerializeField] private BoxCollider _boxCollider;
         [SerializeField] private Rigidbody _rigidBody;
 
@@ -136,7 +137,7 @@ namespace Klondike
 
         public void Highlight(Effect code)
         {
-            _renderer.material = Settings.Instance.GetHighlight( code );
+            _outlineRenderer.material = Settings.Instance.GetHighlight( code );
             _currentEffect = code;
         }
 
@@ -188,12 +189,14 @@ namespace Klondike
             {
                 _status = CardStatus.Closed;
                 AIMaster.Instance.ClosedCard( _suit, _rank );
+                _cardRenderer.material.SetColor("_Color", Settings.Instance.closed);
             }
 
             else if ( _status != CardStatus.Open )
             {
                 _status = CardStatus.Open;
                 AIMaster.Instance.OpenedCard( _suit, _rank );
+                _cardRenderer.material.SetColor("_Color", Settings.Instance.open);
             }
         }
 

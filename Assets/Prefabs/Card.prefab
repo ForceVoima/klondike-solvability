@@ -57,7 +57,8 @@ MonoBehaviour:
   _blockedCards: []
   _suitBlocked: 0
   _solversBlocked: 0
-  _renderer: {fileID: 3279095331902309958}
+  _cardRenderer: {fileID: 6339397070728386841}
+  _outlineRenderer: {fileID: 3279095331902309958}
   _boxCollider: {fileID: 6088812059146223443}
   _rigidBody: {fileID: 8030703980832425949}
 --- !u!33 &5527597806052969443

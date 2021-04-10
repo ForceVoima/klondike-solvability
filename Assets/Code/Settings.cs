@@ -35,6 +35,9 @@ namespace Klondike
         public Material lowPriority;
         public Material solvable;
 
+        public Color open = new Color(1f, 1f, 1f, 1f);
+        public Color closed = new Color( 0.5f, 0.5f, 0.5f, 1f);
+
         public static Settings _instance;
         public static Settings Instance
         {
