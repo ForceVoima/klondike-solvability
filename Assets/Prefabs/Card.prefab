@@ -51,10 +51,9 @@ MonoBehaviour:
   _suit: 4
   _rank: 0
   _red: 0
-  _sequence: 0
-  _parallel: {fileID: 0}
-  _solver1: {fileID: 0}
-  _solver2: {fileID: 0}
+  _status: 1
+  below: {fileID: 0}
+  above: {fileID: 0}
   _blockedCards: []
   _suitBlocked: 0
   _solversBlocked: 0
@@ -115,7 +114,7 @@ BoxCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5249298046186069138}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: e831405f022c58b43bd4b21cc1060cea, type: 2}
   m_IsTrigger: 0
   m_Enabled: 0
   serializedVersion: 2

@@ -37,8 +37,11 @@ namespace Klondike
             }
         }
 
-        public override void ReceiveCard(Card card)
+        public override void ReceiveCard(Card card, bool moveCardGroup = false)
         {
+            if ( _numberOfCards > 0 )
+                _pile[ _numberOfCards-1 ].Blocked( card );
+            
             card.transform.SetParent(transform);
 
             _pile[_numberOfCards] = card;
@@ -46,7 +49,8 @@ namespace Klondike
                 position: transform.position + _positions[_numberOfCards],
                 rotation: _rotation,
                 instant: true,
-                pile: _type
+                pile: _type,
+                moveCardGroup: moveCardGroup
             );
 
             _numberOfCards++;
@@ -69,6 +73,8 @@ namespace Klondike
                 if ( _closed.TopCard != null )
                     _closed.DealTopCard( this );
             }
+            else
+                _pile[ _numberOfCards-1 ].UnBlocked();
         }
 
         public override void DealSequenceOfCards(CardPile targetPile)
@@ -102,7 +108,7 @@ namespace Klondike
             {
                 if ( _pile[i] != null )
                 {
-                    targetPile.ReceiveCard( _pile[i] );
+                    targetPile.ReceiveCard( card: _pile[i], moveCardGroup: true );
                     _pile[i] = null;
                     _numberOfCards--;
                     i++;

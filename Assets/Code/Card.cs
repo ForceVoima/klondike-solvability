@@ -34,6 +34,8 @@ namespace Klondike
 
         public Card Parallel { get { return _parallel; } }
 
+        public Card below, above;
+
         [SerializeField] private Card[] _blockedCards;
 
         [SerializeField] private bool _suitBlocked = false;
@@ -82,7 +84,7 @@ namespace Klondike
             }
         }
 
-        public void MoveTo(Vector3 position, Quaternion rotation, bool instant, PileType pile)
+        public void MoveTo(Vector3 position, Quaternion rotation, bool instant, PileType pile, bool moveCardGroup = false)
         {
             if (instant)
             {
@@ -90,7 +92,8 @@ namespace Klondike
                 transform.rotation = rotation;
             }
 
-            StatusCheck( pile );
+            if ( !moveCardGroup )
+                StatusCheck( pile );
         }
 
         public void ClosedCards(Card[] _cards, int numberOfCards)
@@ -178,15 +181,40 @@ namespace Klondike
                 Highlight( Effect.Normal );
             }
 
+            if ( pile == PileType.FoundationPile )
+                Highlight( Effect.Normal );
+
             if ( pile == PileType.ClosedPile )
             {
                 _status = CardStatus.Closed;
+                AIMaster.Instance.ClosedCard( _suit, _rank );
             }
 
             else if ( _status != CardStatus.Open )
             {
                 _status = CardStatus.Open;
+                AIMaster.Instance.OpenedCard( _suit, _rank );
             }
+        }
+
+        public void Blocked(Card byCard)
+        {
+            _status = CardStatus.Blocked;
+            above = byCard;
+            AIMaster.Instance.ClosedCard(_suit, _rank);
+
+            if ( _currentEffect == Effect.Solvable )
+            {
+                _currentEffect = Effect.Normal;
+                Highlight( Effect.Normal );
+            }
+        }
+
+        public void UnBlocked()
+        {
+            _status = CardStatus.Open;
+            above = null;
+            AIMaster.Instance.OpenedCard(_suit, _rank);
         }
     }
 }

@@ -24,7 +24,7 @@ namespace Klondike
             }
         }
 
-        public virtual void ReceiveCard(Card card)
+        public virtual void ReceiveCard(Card card, bool moveCardGroup = false)
         {
             card.transform.SetParent(transform);
 
@@ -33,7 +33,8 @@ namespace Klondike
                 position: _positions[_numberOfCards],
                 rotation: _rotation,
                 instant: true,
-                pile: _type
+                pile: _type,
+                moveCardGroup: moveCardGroup
             );
 
             _numberOfCards++;

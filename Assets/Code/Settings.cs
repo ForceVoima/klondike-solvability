@@ -33,6 +33,7 @@ namespace Klondike
         public Material suitBlock;
         public Material solverBlock;
         public Material lowPriority;
+        public Material solvable;
 
         public static Settings _instance;
         public static Settings Instance
@@ -40,10 +41,12 @@ namespace Klondike
             get { return _instance; }
         }
 
+        [HideInInspector]
         public Quaternion faceUp = Quaternion.LookRotation(
                 forward: Vector3.forward,
                 upwards: Vector3.up);
 
+        [HideInInspector]
         public Quaternion faceDown = Quaternion.LookRotation(
                 forward: Vector3.forward,
                 upwards: Vector3.down);
@@ -72,6 +75,8 @@ namespace Klondike
                     return solverBlock;
                 case Effect.LowPriority:
                     return lowPriority;
+                case Effect.Solvable:
+                    return solvable;
             }
 
             return normal;

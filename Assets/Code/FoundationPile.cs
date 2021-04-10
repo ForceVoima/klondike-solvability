@@ -49,7 +49,7 @@ namespace Klondike
                 return false;
         }
 
-        public override void ReceiveCard(Card card)
+        public override void ReceiveCard(Card card, bool moveCardGroup = false)
         {
             base.ReceiveCard(card);
 
@@ -57,6 +57,7 @@ namespace Klondike
                 _suit = card.Suit;
 
             GameMaster.Instance.FoundationAddedCard();
+            AIMaster.Instance.CardFounded(card.Suit, card.Rank);
         }
 
         public override void DealTopCard(CardPile pile)

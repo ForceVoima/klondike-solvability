@@ -17,7 +17,7 @@ namespace Klondike
             _positions = new Vector3[7];
 
             _rotation = Quaternion.Euler(
-                x: -180f-Settings.Instance.cardAngle,
+                x: -Settings.Instance.cardAngle,
                 y: 0f,
                 z: 0f
             );
@@ -39,7 +39,7 @@ namespace Klondike
             }
         }
 
-        public override void ReceiveCard(Card card)
+        public override void ReceiveCard(Card card, bool moveCardGroup = false)
         {
             card.ClosedCards( _pile, _numberOfCards );
             base.ReceiveCard(card);

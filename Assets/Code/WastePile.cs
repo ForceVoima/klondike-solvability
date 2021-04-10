@@ -32,7 +32,7 @@ namespace Klondike
             _rotation = Settings.Instance.faceUp;
         }
 
-        public override void ReceiveCard(Card card)
+        public override void ReceiveCard(Card card, bool moveCardGroup = false)
         {
             float random = Random.Range(-15f, 15f);
             Vector3 offset = new Vector3(
