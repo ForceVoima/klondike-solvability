@@ -215,6 +215,8 @@ namespace Klondike
                 _status = CardStatus.Open;
                 AIMaster.Instance.OpenedCard( _suit, _rank );
                 _cardRenderer.material.SetColor("_Color", Settings.Instance.open);
+
+                GameMaster.Instance.CardOpened();
             }
         }
 

@@ -61,6 +61,23 @@ namespace Klondike
                 _blocks[ ( solversBlocked*2 + 1 ) ]++;
         }
 
+        public string GameData()
+        {
+            StringBuilder sb = new StringBuilder();
+
+            for (int i = 0; i < _blocks.Length; i++)
+            {
+                if (i == _blocks.Length-1)
+                    sb.Append( _blocks[i].ToString() );
+                else
+                    sb.Append( _blocks[i].ToString() ).Append(',');
+
+                _blocks[i] = 0;
+            }
+
+            return sb.ToString();
+        }
+
         public void SaveData()
         {
             StringBuilder sb = new StringBuilder();
@@ -98,29 +115,17 @@ namespace Klondike
             {
                 sb.Append( str ).Append( '\n');
             }
-
-                // The target file path e.g.
-        #if UNITY_EDITOR
             var folder = Application.streamingAssetsPath;
 
             if(! Directory.Exists(folder) )
                 Directory.CreateDirectory(folder);
-        #else
-            var folder = Application.persistentDataPath;
-        #endif
 
             var filePath = Path.Combine(folder, "export.csv");
 
             if ( File.Exists(filePath))
                 File.Delete(filePath);
 
-            using(var writer = new StreamWriter(filePath, false))
-            {
-                writer.Write( sb.ToString() );
-            }
-
-            // Or just
-            //File.WriteAllText(content);
+            File.WriteAllText(filePath, sb.ToString() );
 
             Debug.Log($"CSV file written to \"{filePath}\"" + " at " + Time.fixedTime );
 

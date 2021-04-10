@@ -17,8 +17,17 @@ namespace Klondike
         [SerializeField, Header("Custom game")] private string _gameFileName;
 
         public int _cardsInFoundation = 0;
+        public int _gameProgress = -7;
+        public int _gameSelector = 1;
 
         [SerializeField] private GameObject _mainCamera, _winCamera;
+
+        [Header("UI elements")]
+        public TMPro.TextMeshProUGUI gameNameText;
+        public TMPro.TextMeshProUGUI gameProgressText;
+        public TMPro.TextMeshProUGUI bestResultText;
+        public UnityEngine.UI.Button _newGameButton;
+        public UnityEngine.UI.Button _solveButton;
 
         [SerializeField] private KlondikeGame _currentGame;
 
@@ -63,7 +72,7 @@ namespace Klondike
                 pile.Init();
 
             LoadJson();
-            // LoadCustomGame();
+            LoadGame( _currentGame.piles );
         }
 
         private void NewDeal()
@@ -83,13 +92,18 @@ namespace Klondike
             }
 
             _currentGame = new KlondikeGame( _database.allGames.Count + 1 );
-
+            
             for (int i = 0; i < _closedPiles.Length; i++)
             {
                 _currentGame.piles[i] = _closedPiles[i].ToString();
             }
 
             _currentGame.piles[7] = _stock.ToString();
+
+            if ( _currentGame.gameID != 0 && !_database.allGames.Contains(_currentGame) )
+                _database.allGames.Add( _currentGame );
+
+            UpdateUI();
         }
 
         private void Reset()
@@ -110,6 +124,7 @@ namespace Klondike
             _ai.Reset();
             Statistics.Instance.SaveData();
             _cardsInFoundation = 0;
+            _gameProgress = -7;
             StopAllCoroutines();
             _mainCamera.SetActive(true);
             _winCamera.SetActive(false);
@@ -117,11 +132,11 @@ namespace Klondike
 
         public void NewGame()
         {
-            if ( _currentGame.gameID != 0 && !_database.allGames.Contains(_currentGame) )
-                _database.allGames.Add( _currentGame );
+            SaveProgress();
 
             Reset();
             NewDeal();
+            _currentGame.stats = _stats.GameData();
 
             foreach (BuildPile pile in _buildPiles)
                 pile.CheckEmpty();
@@ -140,10 +155,16 @@ namespace Klondike
 
             _currentGame.piles = lines;
             LoadGame(lines);
+            _currentGame.stats = _stats.GameData();
+
+            
+            if ( !_database.allGames.Contains(_currentGame) )
+                _database.allGames.Add( _currentGame );
         }
 
         public void Restart()
         {
+            SaveProgress();
             Reset();
             LoadGame( _currentGame.piles );
         }
@@ -219,6 +240,11 @@ namespace Klondike
 
         public void DeclareWin()
         {
+            SaveProgress();
+
+            if ( !_database.unlocked )
+                Unlock();
+
             StartCoroutine( ThrowCardsWin() );
         }
 
@@ -238,9 +264,14 @@ namespace Klondike
                 yield return new WaitForSeconds(0.25f);
             }
 
-            yield return new WaitForSeconds(30f);
-            NewGame();
             yield return null;
+        }
+
+        private void Unlock()
+        {
+            _database.unlocked = true;
+            _newGameButton.interactable = true;
+            _solveButton.interactable = true;
         }
 
         public void FoundationAddedCard()
@@ -256,20 +287,28 @@ namespace Klondike
             _cardsInFoundation--;
         }
 
+        public void CardOpened()
+        {
+            _gameProgress++;
+            gameProgressText.text = _gameProgress + "/21";
+        }
+
+        private void SaveProgress()
+        {
+            if ( _gameProgress >= _currentGame.bestOpens )
+            {
+                _currentGame.bestOpens = _gameProgress;
+                bestResultText.text = _gameProgress + "/21";
+                
+                if ( _cardsInFoundation > _currentGame.bestFoundations )
+                    _currentGame.bestFoundations = _cardsInFoundation;
+            }
+        }
+
         public void SaveJson()
         {
             string content;
-
-            // The target file path e.g.
-        #if UNITY_EDITOR
             var folder = Application.streamingAssetsPath;
-
-            if(! Directory.Exists(folder) )
-                Directory.CreateDirectory(folder);
-        #else
-            var folder = Application.persistentDataPath;
-        #endif
-
             var filePath = Path.Combine(folder, "database.json");
 
             if ( File.Exists(filePath))
@@ -302,6 +341,49 @@ namespace Klondike
             JsonUtility.FromJsonOverwrite( allText, _database );
 
             _currentGame = _database.allGames[ _database.allGames.Count - 1 ];
+            UpdateUI();
+
+            if ( _database.unlocked )
+                Unlock();
+        }
+
+        public void Exit()
+        {
+            SaveProgress();
+            SaveJson();
+            Application.Quit();
+        }
+
+        private void UpdateUI()
+        {
+            gameNameText.text = "Game: " + _currentGame.gameID + "/" + _database.allGames.Count;
+            bestResultText.text = "Best " + _currentGame.bestOpens + "/21";
+        }
+
+        public void NextGame()
+        {
+            if ( _gameSelector < _database.allGames.Count - 1 )
+            {
+                SaveProgress();
+                Reset();
+                _gameSelector++;
+                _currentGame = _database.allGames[ _gameSelector ];
+                LoadGame( _currentGame.piles );
+                UpdateUI();
+            }
+        }
+
+        public void PreviousGame()
+        {
+            if ( _gameSelector > 0 )
+            {
+                SaveProgress();
+                Reset();
+                _gameSelector--;
+                _currentGame = _database.allGames[ _gameSelector ];
+                LoadGame( _currentGame.piles );
+                UpdateUI();
+            }
         }
     }
 }
