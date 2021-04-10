@@ -43,6 +43,7 @@ namespace Klondike
     {
         Closed,
         Open,
-        Blocked
+        Blocked,
+        Foundation
     }
 }

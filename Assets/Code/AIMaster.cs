@@ -78,22 +78,14 @@ namespace Klondike
 
             rank = _foundationStatus[suit];
 
-            if ( rank == 0 && !_openCards[ suit*13 ] )
+            if ( rank == 0 && !_openCards[ suit*13 ] || rank == 13 )
             {
                 suit++;
                 return;
             }
+            
             rank++;
-
-            while ( rank <= 13 )
-            {
-                if ( !_openCards[ suit*13 + rank - 1 ] )
-                    break;
-                else
-                    _stock.RequestCard( (Suit)suit, rank ).Highlight( Effect.Solvable );
-
-                rank++;
-            }
+            _stock.RequestCard( (Suit)suit, rank ).RecursiveSolvable( true );
         }
     }
 }

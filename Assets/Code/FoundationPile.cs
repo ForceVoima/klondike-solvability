@@ -62,8 +62,12 @@ namespace Klondike
 
         public override void DealTopCard(CardPile pile)
         {
+            Suit suit = TopCard.Suit;
+            int rank = TopCard.Rank;
+
             base.DealTopCard(pile);
             GameMaster.Instance.FoundationTakenCard();
+            AIMaster.Instance.CardFounded( suit, rank-1 );
         }
 
         public void StartWinThrow()

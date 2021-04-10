@@ -31,6 +31,7 @@ namespace Klondike
         public Track Track { get { return _sequence; } }
 
         private Card _parallel, _solver1, _solver2;
+        private Card _suitUp, _suitDown;
 
         public Card Parallel { get { return _parallel; } }
 
@@ -67,6 +68,11 @@ namespace Klondike
                 _sequence = Track.BlackOddRedEven;
             else
                 _sequence = Track.RedOddBlackEven;
+
+            if ( _rank < 13 )
+                _suitUp = Stock.Instance.RequestCard( _suit, _rank+1 );
+            if ( _rank > 1 )
+                _suitDown = Stock.Instance.RequestCard( _suit, _rank-1 );
 
             switch (_suit)
             {
@@ -183,9 +189,12 @@ namespace Klondike
             }
 
             if ( pile == PileType.FoundationPile )
+            {
                 Highlight( Effect.Normal );
+                _status = CardStatus.Foundation;
+            }
 
-            if ( pile == PileType.ClosedPile )
+            else if ( pile == PileType.ClosedPile )
             {
                 _status = CardStatus.Closed;
                 AIMaster.Instance.ClosedCard( _suit, _rank );
@@ -205,12 +214,8 @@ namespace Klondike
             _status = CardStatus.Blocked;
             above = byCard;
             AIMaster.Instance.ClosedCard(_suit, _rank);
-
-            if ( _currentEffect == Effect.Solvable )
-            {
-                _currentEffect = Effect.Normal;
-                Highlight( Effect.Normal );
-            }
+            
+            RecursiveSolvable( false );
         }
 
         public void UnBlocked()
@@ -218,6 +223,28 @@ namespace Klondike
             _status = CardStatus.Open;
             above = null;
             AIMaster.Instance.OpenedCard(_suit, _rank);
+        }
+
+        public void RecursiveSolvable(bool solvable)
+        {
+            if ( _rank == 13 )
+                return;
+
+            if ( solvable && _status == CardStatus.Open )
+            {
+                if ( _currentEffect != Effect.Solvable )
+                    Highlight( Effect.Solvable );
+
+                _suitUp.RecursiveSolvable( true );
+            }
+
+            else
+            {
+                if ( _currentEffect == Effect.Solvable )
+                    Highlight( Effect.Normal );
+
+                _suitUp.RecursiveSolvable( false );
+            }
         }
     }
 }
