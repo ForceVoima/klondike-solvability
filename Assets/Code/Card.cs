@@ -212,11 +212,12 @@ namespace Klondike
 
             else if ( _status != CardStatus.Open )
             {
+                if ( _status == CardStatus.Closed )
+                    GameMaster.Instance.CardOpened();
+
                 _status = CardStatus.Open;
                 AIMaster.Instance.OpenedCard( _suit, _rank );
                 _cardRenderer.material.SetColor("_Color", Settings.Instance.open);
-
-                GameMaster.Instance.CardOpened();
             }
         }
 
@@ -236,15 +237,13 @@ namespace Klondike
 
         public void RecursiveSolvable(bool solvable)
         {
-            if ( _rank == 13 )
-                return;
-
             if ( solvable && _status == CardStatus.Open )
             {
                 if ( _currentEffect != Effect.Solvable )
                     Highlight( Effect.Solvable );
 
-                _suitUp.RecursiveSolvable( true );
+                if ( _rank != 13 )
+                    _suitUp.RecursiveSolvable( true );
             }
 
             else
@@ -252,7 +251,8 @@ namespace Klondike
                 if ( _currentEffect == Effect.Solvable )
                     Highlight( Effect.Normal );
 
-                _suitUp.RecursiveSolvable( false );
+                if ( _rank != 13 )
+                    _suitUp.RecursiveSolvable( false );
             }
         }
     }

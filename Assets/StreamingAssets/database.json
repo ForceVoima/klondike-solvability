@@ -1,0 +1,21 @@
+{
+    "unlocked": false,
+    "allGames": [
+        {
+            "gameID": 1,
+            "piles": [
+                "C3\r",
+                "C5-H8\r",
+                "D3-H7-H2\r",
+                "S9-C6-C10-D8\r",
+                "HK-CJ-C4-HJ-C8\r",
+                "D9-HQ-S8-D5-SJ-SQ\r",
+                "CK-CA-S6-H6-C9-D7-DJ\r",
+                "D2-C7-H3-S3-D6-S7-CQ-H4-H10-H5-SA-HA-S10-D4-DQ-DK-DA-C2-S2-S5-SK-D10-H9-S4"
+            ],
+            "stats": "13,5,2,1,0,0",
+            "bestOpens": 0,
+            "bestFoundations": 0
+        }
+    ]
+}

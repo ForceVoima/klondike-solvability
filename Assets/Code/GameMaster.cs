@@ -19,11 +19,15 @@ namespace Klondike
         public int _cardsInFoundation = 0;
         public int _gameProgress = -7;
         public int _gameSelector = 1;
+        private int _totalGames;
+        private int _wonGames;
+        private float _winRate;
 
         [SerializeField] private GameObject _mainCamera, _winCamera;
 
         [Header("UI elements")]
         public TMPro.TextMeshProUGUI gameNameText;
+        public TMPro.TextMeshProUGUI winRateText;
         public TMPro.TextMeshProUGUI gameProgressText;
         public TMPro.TextMeshProUGUI bestResultText;
         public UnityEngine.UI.Button _newGameButton;
@@ -102,6 +106,8 @@ namespace Klondike
 
             if ( _currentGame.gameID != 0 && !_database.allGames.Contains(_currentGame) )
                 _database.allGames.Add( _currentGame );
+
+            _gameSelector = _database.allGames.Count - 1;
 
             UpdateUI();
         }
@@ -245,6 +251,7 @@ namespace Klondike
             if ( !_database.unlocked )
                 Unlock();
 
+            UpdateWinRate();
             StartCoroutine( ThrowCardsWin() );
         }
 
@@ -298,7 +305,7 @@ namespace Klondike
             if ( _gameProgress >= _currentGame.bestOpens )
             {
                 _currentGame.bestOpens = _gameProgress;
-                bestResultText.text = _gameProgress + "/21";
+                bestResultText.text = "Best " + _gameProgress + "/21";
                 
                 if ( _cardsInFoundation > _currentGame.bestFoundations )
                     _currentGame.bestFoundations = _cardsInFoundation;
@@ -341,6 +348,7 @@ namespace Klondike
             JsonUtility.FromJsonOverwrite( allText, _database );
 
             _currentGame = _database.allGames[ _database.allGames.Count - 1 ];
+            _gameSelector = _database.allGames.Count - 1;
             UpdateUI();
 
             if ( _database.unlocked )
@@ -358,6 +366,24 @@ namespace Klondike
         {
             gameNameText.text = "Game: " + _currentGame.gameID + "/" + _database.allGames.Count;
             bestResultText.text = "Best " + _currentGame.bestOpens + "/21";
+            UpdateWinRate();
+        }
+
+        private void UpdateWinRate()
+        {
+            _totalGames = _database.allGames.Count;
+            _wonGames = 0;
+
+            for (int i = 0; i < _database.allGames.Count; i++)
+            {
+                if ( _database.allGames[i].bestFoundations >= 52 )
+                    _wonGames++;
+            }
+
+            _winRate = (float) _wonGames * 100f / (float) _totalGames;
+            _winRate = Mathf.Round( _winRate );
+
+            winRateText.text = "Win rate: " + _winRate + "%";
         }
 
         public void NextGame()
