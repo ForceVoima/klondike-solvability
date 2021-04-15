@@ -4347,7 +4347,7 @@ GameObject:
   m_Component:
   - component: {fileID: 737346978}
   - component: {fileID: 737346979}
-  m_Layer: 2
+  m_Layer: 0
   m_Name: Table
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4385,7 +4385,7 @@ BoxCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 200, y: 2, z: 200}
-  m_Center: {x: 0, y: -0.5, z: 0}
+  m_Center: {x: 0, y: 0.5, z: 0}
 --- !u!1 &747420442
 GameObject:
   m_ObjectHideFlags: 0
@@ -8423,14 +8423,19 @@ MonoBehaviour:
   - {fileID: 1112130823}
   _ai: {fileID: 778689182}
   _mouseDown: 0
+  _cardHoverActive: 0
   _mouseDownTimer: 0
   _betweenClicks: 0
   _sourceType: 0
   _mouseOverType: 0
   _sourcePile: {fileID: 0}
   _mouseOverPile: {fileID: 0}
+  _activeCard: {fileID: 0}
   _sceneCamera: {fileID: 963194227}
+  _mousePointer: {x: 0, y: 0, z: 0}
   pilesMask: 0
+  hoverMask: 0
+  cardMask: 0
 --- !u!4 &1681732728
 Transform:
   m_ObjectHideFlags: 0

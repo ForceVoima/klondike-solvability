@@ -26,7 +26,13 @@ namespace Klondike
         public bool Red { get { return _red; } }
 
         [SerializeField] private CardStatus _status = CardStatus.Stock;
+        public bool Closed { get { return _status == CardStatus.Closed; } }
         public bool SuitSolvable { get { return (_status == CardStatus.Open || _status == CardStatus.Stock); } }
+        public bool OnTable { get {
+            return ( _status == CardStatus.Closed ||
+                     _status == CardStatus.Open ||
+                     _status == CardStatus.Blocked );
+        } }
         private Effect _currentEffect = Effect.Normal;
         private CardPile _parent;
         public CardPile Parent { get { return _parent; } }
@@ -44,6 +50,8 @@ namespace Klondike
         [SerializeField] private bool _suitBlocked = false;
         [SerializeField] private bool _solverALocked = false;
         [SerializeField] private bool _solverBLocked = false;
+        [SerializeField] private bool _routeAlocked = false;
+        [SerializeField] private bool _routeBlocked = false;
         private int _solversBlocked = 0;
         [SerializeField] private Restrictions _restrictions;
 
@@ -52,6 +60,12 @@ namespace Klondike
         [SerializeField] private Renderer _outlineRenderer;
         [SerializeField] private BoxCollider _boxCollider;
         [SerializeField] private Rigidbody _rigidBody;
+
+        private Vector3 _original = new Vector3();
+        private Vector3 _offset = new Vector3();
+
+        public List<Card> _blockList;
+        public List<Card> _solverList;
 
         public void Init()
         {
@@ -81,6 +95,8 @@ namespace Klondike
 
             _status = CardStatus.Stock;
             _restrictions = new Restrictions();
+            _blockList = new List<Card>();
+            _solverList = new List<Card>();
 
             switch (_suit)
             {
@@ -325,7 +341,7 @@ namespace Klondike
             return ( _rank == card.Rank && _suit == card.Suit );
         }
 
-        public void SolvabilityHeuristicsOrigin( bool allCards = false )
+        public void RecordAdvancedStatistics( bool allCards = false )
         {
             if ( KingOrAce )
             {
@@ -335,50 +351,97 @@ namespace Klondike
                 return;
             }
 
-            bool routeSuit = !_suitBlocked;
-            bool routeA = !_solverALocked;
-            bool routeB = !_solverBLocked;
+            UpdateRoutes();
+
+            if ( _blockedCards.Length > 0 || allCards )
+                Statistics.Instance.AdvancedReport( _suitBlocked, _routeAlocked, _routeBlocked );
+        }
+
+        public void UpdateRoutes()
+        {
+            if ( KingOrAce )
+                return;
+
+            _blockList.Clear();
+            _solverList.Clear();
+
+            _routeAlocked = _solverALocked;
+            _routeBlocked = _solverBLocked;
 
             if ( !_solverALocked )
-                routeA = _solverA.Available( _restrictions );
+                _routeAlocked = !_solverA.Available( _restrictions, _blockList, _solverList );
+            else
+                _blockList.Add( _solverA );
 
             if ( !_solverBLocked )
-                routeB = _solverB.Available( _restrictions );
+                _routeBlocked = !_solverB.Available( _restrictions, _blockList, _solverList );
+            else
+                _blockList.Add( _solverB );
 
-            if ( !routeSuit && !routeA && !routeB )
+            if ( _suitBlocked )
+                _blockList.Add( _suitBlocker );
+
+            if ( _suitBlocked && _routeAlocked && _routeBlocked )
             {
                 SetColor(Settings.Instance.block);
                 Highlight( Effect.Normal );
             }
-            else if ( !routeA && !routeB )
+            else if ( _routeAlocked && _routeBlocked )
+            {
                 Highlight( Effect.MustSuitSolve );
-
-            if ( _blockedCards.Length > 0 || allCards )
-                Statistics.Instance.AdvancedReport( !routeSuit, !routeA, !routeB );
+                _suitDown.RecursiveSuitDown( _solverList );
+            }
         }
 
-        public bool Available(Restrictions restrictions)
+        public void RecursiveSuitDown(List<Card> solverList)
+        {
+            if ( OnTable )
+                solverList.Add( this );
+
+            if ( _rank > 1 )
+                _suitDown.RecursiveSuitDown( solverList );
+        }
+
+        public bool Available(Restrictions restrictions, List<Card> blocklist, List<Card> solveList)
         {
             if ( _status == CardStatus.Closed || _status == CardStatus.Open )
             {
                 if ( this._restrictions.pile == restrictions.pile &&
                      this._restrictions.position > restrictions.position )
                 {
+                    blocklist.Add( this );
                     return false;
                 }
 
-                return true;
+                if ( cardAbove != null )
+                {
+                    bool pos = cardAbove.AboveCardPossible( restrictions, this._restrictions );
+
+                    if ( pos )
+                        solveList.Add( this );
+                    else
+                        blocklist.Add( this );
+                        
+                    return pos;
+                }
+                else
+                {
+                    solveList.Add( this );
+                    return true;
+                }
             }
             else if ( _status == CardStatus.Stock )
             {
                 if ( _rank == 13)
                     return true;
 
-                bool a = _solverA.Available( restrictions );
-                bool b = _solverB.Available( restrictions );
+                bool a = _solverA.Available( restrictions, blocklist, solveList );
+                bool b = _solverB.Available( restrictions, blocklist, solveList );
 
                 return (a || b);
             }
+            else if ( _status == CardStatus.Blocked )
+                blocklist.Add( this );
             return false;
         }
 
@@ -441,6 +504,53 @@ namespace Klondike
                 return (a || b);
             }
             return false;
+        }
+
+        public void SaveOffset(Vector3 reference)
+        {
+            _original = transform.position;
+            _offset = transform.position - reference + Vector3.up * 1.0f;
+        }
+
+        public void Hover(Vector3 cursor)
+        {
+            transform.position = cursor + _offset;
+        }
+
+        public void EndHover()
+        {
+            transform.position = _original;
+        }
+
+        public void ShowSolver(bool show)
+        {
+            foreach (Card card in _blockList)
+            {
+                if ( show )
+                    card.SetColor( Settings.Instance.block );
+                else
+                    card.NormalColor();
+            }
+
+            foreach (Card card in _solverList)
+            {
+                if ( show )
+                    card.SetColor( Settings.Instance.solver );
+                else
+                    card.NormalColor();
+            }
+        }
+
+        private void NormalColor()
+        {
+            if ( _suitBlocked && _solverALocked && _solverBLocked )
+                SetColor( Settings.Instance.block );
+
+            else if ( _status == CardStatus.Closed )
+                SetColor( Settings.Instance.closed );
+
+            else
+                SetColor( Settings.Instance.open );
         }
     }
 }

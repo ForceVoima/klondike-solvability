@@ -15,6 +15,7 @@ namespace Klondike
         [SerializeField] private AIMaster _ai;
 
         [SerializeField] private bool _mouseDown = false;
+        [SerializeField] private bool _cardHoverActive = false;
         [SerializeField] private float _mouseDownTimer = 0f, _betweenClicks = 0f;
 
         [SerializeField] private PileType _sourceType = PileType.NotSet;
@@ -22,9 +23,14 @@ namespace Klondike
 
         [SerializeField] private PlayerPile _sourcePile;
         [SerializeField] private PlayerPile _mouseOverPile;
+        private Card _activeCard;
+        private Card _showSolversCard;
         [SerializeField] private Camera _sceneCamera;
+        private Vector3 _mousePointer;
 
         public int pilesMask;
+        public int hoverMask;
+        public int cardMask;
 
         public void Init()
         {
@@ -40,6 +46,8 @@ namespace Klondike
             }
 
             pilesMask = LayerMask.GetMask("Piles");
+            hoverMask = LayerMask.GetMask("Default", "Piles");
+            cardMask = LayerMask.GetMask("Cards");
         }
 
         private void Update()
@@ -54,6 +62,7 @@ namespace Klondike
                 _mouseDown = true;
                 _mouseDownTimer = 0f;
                 ClickRaycast();
+                DraggedCard();
                 SetSource();
             }
             
@@ -63,7 +72,15 @@ namespace Klondike
             if ( Input.GetMouseButtonUp(1) )
                 MouseButtonTwoAction();
 
+            if ( Input.GetMouseButtonDown(3) )
+                MouseFourDown();
+            if ( Input.GetMouseButtonUp(3) )
+                MouseFourUp();
+
             MouseWheelInputs();
+
+            if ( _cardHoverActive )
+                CardHoverActions();
         }
 
         private void MouseButtonOneAction()
@@ -72,9 +89,15 @@ namespace Klondike
 
             _mouseDown = false;
 
+            if ( _cardHoverActive )
+            {
+                _activeCard.EndHover();
+                _cardHoverActive = false;
+            }
+
             if ( _sourceType == PileType.NotSet ||
                  _mouseOverType == PileType.NotSet )
-            {                
+            {
                 _betweenClicks = 0f;
             }
             else if ( _sourcePile == _mouseOverPile )
@@ -196,6 +219,13 @@ namespace Klondike
 
         private void SetSource()
         {
+            if ( _cardHoverActive && _activeCard.Closed )
+            {
+                _sourceType = PileType.NotSet;
+                _sourcePile = null;
+                return;
+            }
+
             _sourceType = _mouseOverType;
             _sourcePile = _mouseOverPile;
         }
@@ -227,6 +257,7 @@ namespace Klondike
 
                 if ( pile != null)
                 {
+                    _mousePointer = hit.point;
                     _mouseOverPile = pile;
                     _mouseOverType = pile.Type;
                     return;
@@ -235,6 +266,95 @@ namespace Klondike
 
             _mouseOverType = PileType.NotSet;
             _mouseOverPile = null;
+        }
+
+        private void DraggedCard()
+        {
+            if ( _mouseOverType == PileType.Stock ||
+                 _mouseOverType == PileType.NotSet )
+                 return;
+            else if ( _mouseOverType == PileType.WasteHeap )
+            {
+                _activeCard = _mouseOverPile.TopCard;
+                _activeCard.SaveOffset( _mousePointer );
+                _cardHoverActive = true;
+                return;
+            }
+
+            if ( CardRaycast(out _activeCard) )
+            {
+                if ( _activeCard == null && _mouseOverPile != null )
+                    _activeCard = _mouseOverPile.TopCard;
+
+                _activeCard.SaveOffset( _mousePointer );
+                _cardHoverActive = true;
+                return;
+            }
+            else if ( _mouseOverPile != null && _mouseOverPile.hasCards )
+            {
+                _activeCard = _mouseOverPile.TopCard;
+                _activeCard.SaveOffset( _mousePointer );
+                _cardHoverActive = true;
+                return;
+            }
+            _activeCard = null;
+            _cardHoverActive = false;
+        }
+
+        private bool CardRaycast(out Card card)
+        {
+            RaycastHit hit;
+            Ray ray = _sceneCamera.ScreenPointToRay(Input.mousePosition);
+
+            if ( Physics.Raycast(
+                 ray: ray,
+                 hitInfo: out hit,
+                 maxDistance: 100f,
+                 layerMask: cardMask ) )
+            {
+                _mousePointer = hit.point;
+                card = hit.transform.GetComponent<Card>();
+                return true;
+            }
+
+            card = null;
+            return false;
+        }
+
+        private void CardHoverActions()
+        {
+            RaycastHit hit;
+            Ray ray = _sceneCamera.ScreenPointToRay(Input.mousePosition);
+
+             if ( Physics.Raycast(
+                  ray: ray,
+                  hitInfo: out hit,
+                  maxDistance: 100f,
+                  layerMask: hoverMask ) )
+            {
+                _mousePointer = hit.point;
+                _activeCard.Hover( hit.point );
+            }
+        }
+
+        private void MouseFourDown()
+        {
+            if ( !CardRaycast( out _showSolversCard ) )
+                return;
+
+            if ( _showSolversCard == null || !_showSolversCard.OnTable )
+                return;
+            
+            _showSolversCard.UpdateRoutes();
+            _showSolversCard.ShowSolver(true);
+        }
+
+        private void MouseFourUp()
+        {
+            if ( _showSolversCard != null )
+                _showSolversCard.ShowSolver(false);
+            
+            _showSolversCard = null;
         }
     }
 }

@@ -11,8 +11,7 @@ namespace Klondike
         public PileType Type { get { return _type; } }
         [SerializeField] protected Card[] _pile;
         [SerializeField, Range(0,52)] protected int _numberOfCards;
-
-        public int NumberOfCards { get { return _numberOfCards; } }
+        public bool hasCards { get { return (_numberOfCards > 0); } }
         protected Vector3[] _positions;
         protected Quaternion _rotation;
         public Card TopCard {
@@ -28,8 +27,8 @@ namespace Klondike
         public virtual void ReceiveCard(Card card, bool moveCardGroup = false)
         {
             card.transform.SetParent(transform);
-
             _pile[_numberOfCards] = card;
+
             card.MoveTo(
                 position: _positions[_numberOfCards],
                 rotation: _rotation,
@@ -107,7 +106,7 @@ namespace Klondike
         {
             for (int i = 0; i < _numberOfCards; i++)
             {
-                _pile[i].SolvabilityHeuristicsOrigin( allCards );
+                _pile[i].RecordAdvancedStatistics( allCards );
             }
         }
     }

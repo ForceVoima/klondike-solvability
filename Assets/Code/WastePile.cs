@@ -87,7 +87,7 @@ namespace Klondike
 
         public void NextCardAction(bool strong)
         {
-            if ( _stock.NumberOfCards > 0 )
+            if ( _stock.hasCards )
                 _stock.DealTopCard(this);
 
             else if ( _numberOfCards > 1 && strong )

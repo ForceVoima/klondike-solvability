@@ -22,7 +22,7 @@ namespace Klondike
         private int _totalGames;
         private int _wonGames;
         private float _winRate;
-        // private int _nGames = 0;
+        private int _nGames = 0;
 
         [SerializeField] private GameObject _mainCamera, _winCamera;
 
@@ -38,6 +38,7 @@ namespace Klondike
         [SerializeField] private KlondikeGame _currentGame;
 
         public GameDatabase _database;
+        public bool massDataMode = false;
 
         public static GameMaster _instance;
         public static GameMaster Instance
@@ -77,23 +78,27 @@ namespace Klondike
             foreach (BuildPile pile in _buildPiles)
                 pile.Init();
 
-            LoadJson();
-            LoadGame( _currentGame.piles );
+            if ( !massDataMode )
+            {
+                LoadJson();
+                LoadGame( _currentGame.piles );
+            }
         }
 
-        /*
         private void Update()
         {
-            if ( _nGames < 10001 )
+            if ( massDataMode )
             {
-                NewGame( addToDatabase: false );
-                _nGames++;
+                if ( _nGames < 10001 )
+                {
+                    NewGame( addToDatabase: false );
+                    _nGames++;
 
-                if ( _nGames == 10001 )
-                    _stats.SaveToFile();
-            }    
+                    if ( _nGames == 10001 )
+                        _stats.SaveToFile();
+                }
+            }  
         }
-        */
 
         private void NewDeal(bool addToDatabase = true)
         {
