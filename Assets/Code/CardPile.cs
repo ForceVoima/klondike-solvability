@@ -102,5 +102,13 @@ namespace Klondike
         public virtual void DealCardTo(CardPile pile, Suit suit, int rank)
         {
         }
+
+        public void PileAnalysis(bool allCards = false)
+        {
+            for (int i = 0; i < _numberOfCards; i++)
+            {
+                _pile[i].SolvabilityHeuristicsOrigin( allCards );
+            }
+        }
     }
 }

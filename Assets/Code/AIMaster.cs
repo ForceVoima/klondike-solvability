@@ -45,7 +45,7 @@ namespace Klondike
             }
         }
 
-        public void OpenedCard(Suit suit, int rank)
+        public void UpdateSolvable(Suit suit, int rank)
         {
             HighlightSolvableInSuit( (int)suit );
         }
@@ -96,7 +96,7 @@ namespace Klondike
 
         private int SolveSuit(int suit)
         {
-            if ( !_foundationCards[ suit ].Solvable )
+            if ( !_foundationCards[ suit ].SuitSolvable )
                 return 0;
 
             Card card = _foundationCards[ suit ];

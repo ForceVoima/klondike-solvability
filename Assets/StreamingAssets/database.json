@@ -1,5 +1,5 @@
 {
-    "unlocked": false,
+    "unlocked": true,
     "allGames": [
         {
             "gameID": 1,
@@ -14,6 +14,38 @@
                 "D2-C7-H3-S3-D6-S7-CQ-H4-H10-H5-SA-HA-S10-D4-DQ-DK-DA-C2-S2-S5-SK-D10-H9-S4"
             ],
             "stats": "13,5,2,1,0,0",
+            "bestOpens": 0,
+            "bestFoundations": 0
+        },
+        {
+            "gameID": 2,
+            "piles": [
+                "S11",
+                "H1-C13",
+                "D3-H2-S10",
+                "S4-C9-D9-C10",
+                "S5-H11-C1-D13-D1",
+                "D5-H13-H12-S9-S1-H9",
+                "H8-C11-C7-D8-H4-H6-H3",
+                "C3-D12-S13-D10-D2-S3-S12-C12-S7-C5-D11-S2-C4-H7-S6-H10-C8-H5-D7-C6-C2-D4-D6-S8"
+            ],
+            "stats": "18,1,1,1,0,0",
+            "bestOpens": 15,
+            "bestFoundations": 16
+        },
+        {
+            "gameID": 3,
+            "piles": [
+                "H3",
+                "C7-C3",
+                "H4-S10-D12",
+                "C13-C8-S13-C2",
+                "D11-D8-S3-H7-S7",
+                "H13-D13-H6-H9-C1-C12",
+                "C9-D3-D2-S9-H5-D9-S5",
+                "S1-H10-S8-D7-H1-D1-S4-D4-S6-C5-H8-H11-C11-H12-S11-S2-S12-D5-C4-C6-H2-C10-D10-D6"
+            ],
+            "stats": "17,2,0,1,0,1",
             "bestOpens": 0,
             "bestFoundations": 0
         }

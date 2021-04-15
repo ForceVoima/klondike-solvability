@@ -22,6 +22,7 @@ namespace Klondike
         private int _totalGames;
         private int _wonGames;
         private float _winRate;
+        // private int _nGames = 0;
 
         [SerializeField] private GameObject _mainCamera, _winCamera;
 
@@ -30,6 +31,7 @@ namespace Klondike
         public TMPro.TextMeshProUGUI winRateText;
         public TMPro.TextMeshProUGUI gameProgressText;
         public TMPro.TextMeshProUGUI bestResultText;
+        public TMPro.TextMeshProUGUI unsovalbleText;
         public UnityEngine.UI.Button _newGameButton;
         public UnityEngine.UI.Button _solveButton;
 
@@ -54,7 +56,7 @@ namespace Klondike
                 return;
             }
 
-            Application.targetFrameRate = 100;
+            // Application.targetFrameRate = 100;
 
             _stats.Init();
             _settings.Init();
@@ -79,7 +81,21 @@ namespace Klondike
             LoadGame( _currentGame.piles );
         }
 
-        private void NewDeal()
+        /*
+        private void Update()
+        {
+            if ( _nGames < 10001 )
+            {
+                NewGame( addToDatabase: false );
+                _nGames++;
+
+                if ( _nGames == 10001 )
+                    _stats.SaveToFile();
+            }    
+        }
+        */
+
+        private void NewDeal(bool addToDatabase = true)
         {
             _stock.Shuffle();
 
@@ -104,12 +120,16 @@ namespace Klondike
 
             _currentGame.piles[7] = _stock.ToString();
 
-            if ( _currentGame.gameID != 0 && !_database.allGames.Contains(_currentGame) )
-                _database.allGames.Add( _currentGame );
+            if (addToDatabase)
+            {
+                if ( _currentGame.gameID != 0 && !_database.allGames.Contains(_currentGame) )
+                    _database.allGames.Add( _currentGame );
 
-            _gameSelector = _database.allGames.Count - 1;
+                _gameSelector = _database.allGames.Count - 1;
+            }
 
-            UpdateUI();
+            if ( addToDatabase )
+                UpdateUI();
         }
 
         private void Reset()
@@ -136,18 +156,26 @@ namespace Klondike
             _winCamera.SetActive(false);
         }
 
-        public void NewGame()
+        public void NewGameButton()
         {
-            SaveProgress();
+            NewGame( addToDatabase: true );
+        }
+
+        public void NewGame(bool addToDatabase = true)
+        {
+            if ( addToDatabase )
+                SaveProgress();
 
             Reset();
-            NewDeal();
+            NewDeal( addToDatabase );
             _currentGame.stats = _stats.GameData();
 
             foreach (BuildPile pile in _buildPiles)
                 pile.CheckEmpty();
 
             _ai.HighlightSolvable();
+            GameAnalysis();
+            _currentGame.stats = _stats.GameData();
         }
 
         public void LoadCustomGame()
@@ -214,6 +242,8 @@ namespace Klondike
                 pile.CheckEmpty();
 
             _ai.HighlightSolvable();
+            GameAnalysis();
+            _currentGame.stats = _stats.GameData();
         }
 
         private void ReadCard(string text, out Suit suit, out int rank)
@@ -410,6 +440,24 @@ namespace Klondike
                 LoadGame( _currentGame.piles );
                 UpdateUI();
             }
+        }
+
+        private void GameAnalysis()
+        {
+            foreach ( ClosedPile pile in _closedPiles )
+            {
+                pile.PileAnalysis( allCards: false );
+            }
+            
+            for (int i = 1; i < 7; i++)
+            {
+                _buildPiles[i].PileAnalysis( allCards: true );
+            }
+
+            if ( _stats.Unsovable() )
+                unsovalbleText.text = "Unsolvable";
+            else
+                unsovalbleText.text = "";
         }
     }
 }

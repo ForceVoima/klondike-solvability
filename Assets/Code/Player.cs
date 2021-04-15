@@ -22,9 +22,14 @@ namespace Klondike
 
         [SerializeField] private PlayerPile _sourcePile;
         [SerializeField] private PlayerPile _mouseOverPile;
+        [SerializeField] private Camera _sceneCamera;
+
+        public int pilesMask;
 
         public void Init()
         {
+            pilesMask = LayerMask.GetMask("Piles");
+
             if ( _instance == null)
                 _instance = this;
             else if (_instance != this)
@@ -33,6 +38,8 @@ namespace Klondike
                 Debug.LogWarning("Destroying dublicate settings!");
                 return;
             }
+
+            pilesMask = LayerMask.GetMask("Piles");
         }
 
         private void Update()
@@ -46,6 +53,7 @@ namespace Klondike
             {
                 _mouseDown = true;
                 _mouseDownTimer = 0f;
+                ClickRaycast();
                 SetSource();
             }
             
@@ -60,6 +68,8 @@ namespace Klondike
 
         private void MouseButtonOneAction()
         {
+            ClickRaycast();
+
             _mouseDown = false;
 
             if ( _sourceType == PileType.NotSet ||
@@ -98,6 +108,8 @@ namespace Klondike
 
         private void MouseButtonTwoAction()
         {
+            ClickRaycast();
+
             if ( _mouseOverType == PileType.Stock )
                 _waste.PreviousCardAction();
             else if ( _mouseOverType == PileType.WasteHeap ||
@@ -119,6 +131,11 @@ namespace Klondike
 
         private void MouseWheelInputs()
         {
+            if ( Input.GetAxis("Mouse ScrollWheel") != 0f )
+            {
+                ClickRaycast();
+            }
+
             if (_mouseOverType == PileType.WasteHeap ||
                 _mouseOverType == PileType.Stock )
             {
@@ -191,6 +208,31 @@ namespace Klondike
 
         public void Exited(PileType type, PlayerPile pile)
         {
+            _mouseOverType = PileType.NotSet;
+            _mouseOverPile = null;
+        }
+
+        private void ClickRaycast()
+        {
+            RaycastHit hit;
+            Ray ray = _sceneCamera.ScreenPointToRay(Input.mousePosition);
+
+             if ( Physics.Raycast(
+                  ray: ray,
+                  hitInfo: out hit,
+                  maxDistance: 100f,
+                  layerMask: pilesMask ) )
+            {
+                PlayerPile pile = hit.transform.GetComponentInChildren<PlayerPile>();
+
+                if ( pile != null)
+                {
+                    _mouseOverPile = pile;
+                    _mouseOverType = pile.Type;
+                    return;
+                }
+            }
+
             _mouseOverType = PileType.NotSet;
             _mouseOverPile = null;
         }

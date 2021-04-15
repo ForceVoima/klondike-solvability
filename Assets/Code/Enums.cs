@@ -26,7 +26,7 @@ namespace Klondike
     public enum Effect
     {
         Normal = 0,
-        SuitBlock = 1,
+        MustSuitSolve = 1,
         SolverBlock = 2,
         Solvable = 3,
         LowPriority = 4
@@ -44,6 +44,7 @@ namespace Klondike
         Closed,
         Open,
         Blocked,
-        Foundation
+        Foundation,
+        Stock
     }
 }

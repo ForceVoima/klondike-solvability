@@ -8,6 +8,7 @@ namespace Klondike
     {
         [Header("Closed pile specific")]
         [SerializeField] private BuildPile _build;
+        [SerializeField, Range(1,7)] private int _pileNumber;
 
         public void Init()
         {
@@ -41,7 +42,7 @@ namespace Klondike
 
         public override void ReceiveCard(Card card, bool moveCardGroup = false)
         {
-            card.ClosedCards( _pile, _numberOfCards );
+            card.ClosedCards( _pile, _pileNumber, _numberOfCards );
             base.ReceiveCard(card);
         }
 
