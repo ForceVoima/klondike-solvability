@@ -39,9 +39,6 @@ namespace Klondike
 
         public override void ReceiveCard(Card card, bool moveCardGroup = false)
         {
-            if ( hasCards )
-                TopCard.Blocked( card );
-            
             card.transform.SetParent(transform);
 
             _pile[_numberOfCards] = card;
@@ -58,6 +55,9 @@ namespace Klondike
 
             if ( _track == Track.Empty )
                 _track = card.Track;
+
+            if ( _numberOfCards > 1 )
+                _pile[_numberOfCards-2].Blocked( card );
         }
 
         public override void DealTopCard(CardPile pile)
@@ -104,6 +104,9 @@ namespace Klondike
                 else
                     return;
             }
+
+            if ( i == 0 )
+                _pile[i].Solved();
 
             while ( i < 13 )
             {

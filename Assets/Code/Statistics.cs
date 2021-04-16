@@ -22,6 +22,7 @@ namespace Klondike
         }
 
         private List<string> _dataOut;
+        private bool _firstCard = true;
 
         public void Init()
         {
@@ -43,8 +44,12 @@ namespace Klondike
 
         public void Report(Card card, bool suitBlocked, int solversBlocked)
         {
-            _ranks[ (card.Rank-1) ]++;
-            _suits[ (int)card.Suit ]++;
+            if ( _firstCard )
+            {
+                _ranks[ (card.Rank-1) ]++;
+                _suits[ (int)card.Suit ]++;
+                _firstCard = false;
+            }
 
             if (!suitBlocked)
                 _blocks[ solversBlocked*2 ]++;
@@ -124,6 +129,7 @@ namespace Klondike
             }
 
             _dataOut.Add( sb.ToString() );
+            _firstCard = true;
         }
 
         public void SaveToFile()

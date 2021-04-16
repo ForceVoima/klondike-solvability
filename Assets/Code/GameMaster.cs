@@ -23,6 +23,7 @@ namespace Klondike
         private int _wonGames;
         private float _winRate;
         private int _nGames = 0;
+        private int _impossibleGames = 0;
 
         [SerializeField] private GameObject _mainCamera, _winCamera;
 
@@ -89,12 +90,20 @@ namespace Klondike
         {
             if ( massDataMode )
             {
-                if ( _nGames < 10001 )
+
+                if ( _nGames < 100001 )
                 {
+                    gameNameText.text = _nGames.ToString();
                     NewGame( addToDatabase: false );
                     _nGames++;
 
-                    if ( _nGames == 10001 )
+                    if ( _stats.Unsovable() )
+                    {
+                        _impossibleGames++;
+                        unsovalbleText.text = _impossibleGames.ToString();
+                    }
+
+                    if ( _nGames == 100001 )
                         _stats.SaveToFile();
                 }
             }  
