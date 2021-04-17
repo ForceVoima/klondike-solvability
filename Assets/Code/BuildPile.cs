@@ -62,9 +62,22 @@ namespace Klondike
 
         public override void DealTopCard(CardPile pile)
         {
+            TurnHistory.Instance.ReportMove(
+                card: TopCard,
+                source: this,
+                target: pile
+            );
+
             base.DealTopCard(pile);
             CheckEmpty();
         }
+
+        public override void TopCardTaken()
+        {
+            _pile[ _numberOfCards-1 ] = null;
+            _numberOfCards--;
+        }
+
         public void CheckEmpty()
         {
             if ( _numberOfCards == 0 )
@@ -82,7 +95,7 @@ namespace Klondike
         {
             int rank, i;
 
-            if ( targetPile.TopCard == null )
+            if ( !targetPile.hasCards )
             {
                 rank = 13;
                 i = 0;

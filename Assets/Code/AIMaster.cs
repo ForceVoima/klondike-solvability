@@ -45,7 +45,7 @@ namespace Klondike
             }
         }
 
-        public void UpdateSolvable(Suit suit, int rank)
+        public void UpdateSolvable(Suit suit)
         {
             HighlightSolvableInSuit( (int)suit );
         }
@@ -106,6 +106,8 @@ namespace Klondike
 
         private int SolveCard(Card card)
         {
+            TurnHistory.Instance.StartNewMove();
+
             CardPile pile = card.Parent;
             PileType type = pile.Type;
 

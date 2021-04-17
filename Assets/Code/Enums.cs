@@ -47,4 +47,13 @@ namespace Klondike
         Foundation,
         Stock
     }
+
+    public enum MoveType
+    {
+        Stock,
+        ClosedToOpen,
+        TableToTable,
+        TableToFoundation,
+        WorryBack
+    }
 }

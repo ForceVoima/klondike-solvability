@@ -14,8 +14,8 @@ namespace Klondike
         {
             _type = PileType.ClosedPile;
 
-            _pile = new Card[7];
-            _positions = new Vector3[7];
+            _pile = new Card[8];
+            _positions = new Vector3[8];
 
             _rotation = Quaternion.Euler(
                 x: -Settings.Instance.cardAngle,
@@ -30,7 +30,7 @@ namespace Klondike
                       Settings.Instance.cardHeight/2f;
             float z = transform.position.z;
 
-            for (int i = 0; i < 7; i++)
+            for (int i = 0; i < 8; i++)
             {
                 _positions[i].x = x;
                 _positions[i].y = y;
@@ -44,10 +44,17 @@ namespace Klondike
         {
             card.ClosedCards( _pile, _pileNumber, _numberOfCards );
             base.ReceiveCard(card);
+            _build.transform.position = _positions[ _numberOfCards ];
         }
 
         public override void DealTopCard(CardPile pile)
         {
+            TurnHistory.Instance.ReportMove(
+                card: TopCard,
+                source: this,
+                target: pile
+            );
+
             base.DealTopCard(pile);
             _build.transform.position = _positions[ _numberOfCards ];
         }

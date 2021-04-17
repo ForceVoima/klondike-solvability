@@ -119,10 +119,52 @@ namespace Klondike
                 _pile[i].Reset();
             }
         }
+
+        public void ReceiveCardToIndex(Card card, int index)
+        {
+            int i = _numberOfCards;
+            Vector3 currentPos;
+
+            while (i > index)
+            {
+                _pile[i] = _pile[i-1];
+                currentPos = _pile[i-1].transform.position;
+
+                _pile[i].MoveTo(
+                    position: currentPos,
+                    rotation: _rotation,
+                    instant: true,
+                    pile: _type,
+                    parent: this
+                );
+                i--;
+            }
+
+            currentPos = _positions[ index ];
+
+            card.transform.SetParent(transform);
+            _pile[ index ] = card;
+
+            card.MoveTo(
+                position: currentPos,
+                rotation: _rotation,
+                instant: true,
+                pile: _type,
+                parent: this
+            );
+
+            _numberOfCards++;
+        }
         
         public override void DealCardTo(CardPile pile, Suit suit, int rank)
         {
             int i = IndexOf(suit, rank);
+
+            TurnHistory.Instance.ReportMove(
+                card: _pile[i],
+                source: this,
+                target: pile
+            );
 
             pile.ReceiveCard( _pile[i] );
             _numberOfCards--;

@@ -13,6 +13,7 @@ namespace Klondike
         [SerializeField] protected Settings _settings;
         [SerializeField] protected Player _player;
         [SerializeField] protected AIMaster _ai;
+        [SerializeField] protected TurnHistory _history;
 
         [SerializeField, Header("Custom game")] private string _gameFileName;
 
@@ -67,6 +68,7 @@ namespace Klondike
             _stock.Init();
             _stock.Shuffle();
             _ai.Init();
+            _history.Init();
 
             _waste.Init();
 
@@ -162,6 +164,7 @@ namespace Klondike
             _stock.ResetCards();
 
             _ai.Reset();
+            _history.Reset();
             Statistics.Instance.SaveData();
             _cardsInFoundation = 0;
             _gameProgress = -7;
@@ -190,6 +193,7 @@ namespace Klondike
             _ai.HighlightSolvable();
             GameAnalysis();
             _currentGame.stats = _stats.GameData();
+            _history.Reset();
         }
 
         public void LoadCustomGame()
@@ -258,6 +262,7 @@ namespace Klondike
             _ai.HighlightSolvable();
             GameAnalysis();
             _currentGame.stats = _stats.GameData();
+            _history.Reset();
         }
 
         private void ReadCard(string text, out Suit suit, out int rank)

@@ -315,10 +315,12 @@ namespace Klondike
                         GameMaster.Instance.CardOpened();
 
                     _status = CardStatus.Open;
-                    AIMaster.Instance.UpdateSolvable( _suit, _rank );
+                    AIMaster.Instance.UpdateSolvable( _suit );
                     SetColor( Settings.Instance.open );
                     return;
                 }
+                else if ( _status == CardStatus.Stock )
+                    _status = CardStatus.Open;
             }
 
             else if ( pile == PileType.Stock || pile == PileType.WasteHeap )
@@ -355,7 +357,7 @@ namespace Klondike
         {
             _status = CardStatus.Open;
             cardAbove = null;
-            AIMaster.Instance.UpdateSolvable(_suit, _rank);
+            AIMaster.Instance.UpdateSolvable( _suit );
         }
 
         public void SuitUpRecursiveUpdate()

@@ -70,6 +70,25 @@ namespace Klondike
             AIMaster.Instance.CardFounded( suit, rank-1 );
         }
 
+        public override void TopCardTaken()
+        {
+            Suit suit = TopCard.Suit;
+            int rank = TopCard.Rank;
+            GameMaster.Instance.FoundationTakenCard();
+            AIMaster.Instance.CardFounded( suit, rank-1 );
+            _pile[ _numberOfCards-1 ] = null;
+            _numberOfCards--;
+        }
+
+        public override void ReturnTopCard(CardPile pile)
+        {
+            Suit suit = TopCard.Suit;
+            int rank = TopCard.Rank;
+            GameMaster.Instance.FoundationTakenCard();
+            AIMaster.Instance.CardFounded( suit, rank-1 );
+            base.ReturnTopCard(pile);
+        }
+
         public void StartWinThrow()
         {
             StartCoroutine( ThrowCardsWin() );

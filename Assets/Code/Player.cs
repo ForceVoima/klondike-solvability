@@ -185,6 +185,7 @@ namespace Klondike
             {
                 if ( _mouseOverPile.AcceptsCard( _sourcePile.TopCard ) )
                 {
+                    TurnHistory.Instance.StartNewMove();
                     _sourcePile.DealTopCard( _mouseOverPile );
                 }
             }
@@ -202,7 +203,10 @@ namespace Klondike
         private void BuildPileBuild()
         {
             if ( _mouseOverPile.AcceptsCard( _sourcePile.TopCard ) )
+            {
+                TurnHistory.Instance.StartNewMove();
                 _sourcePile.DealTopCard( _mouseOverPile );
+            }
         }
 
         private void BuildDrag()
@@ -210,7 +214,10 @@ namespace Klondike
             if ( _mouseOverType == PileType.FoundationPile )
             {
                 if ( _mouseOverPile.AcceptsCard( _sourcePile.TopCard ) )
+                {
+                    TurnHistory.Instance.StartNewMove();
                     _sourcePile.DealTopCard( _mouseOverPile );
+                }
             }
 
             if ( _mouseOverType == PileType.BuildPile )
@@ -275,9 +282,18 @@ namespace Klondike
                  return;
             else if ( _mouseOverType == PileType.WasteHeap )
             {
-                _activeCard = _mouseOverPile.TopCard;
-                _activeCard.SaveOffset( _mousePointer );
-                _cardHoverActive = true;
+                if ( _mouseOverPile.hasCards )
+                {
+                    _activeCard = _mouseOverPile.TopCard;
+                    _activeCard.SaveOffset( _mousePointer );
+                    _cardHoverActive = true;
+                }
+                else
+                {
+                    _activeCard = null;
+                    _cardHoverActive = false;
+                }
+                
                 return;
             }
 
