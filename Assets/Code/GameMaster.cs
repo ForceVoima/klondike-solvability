@@ -93,7 +93,7 @@ namespace Klondike
             if ( massDataMode )
             {
 
-                if ( _nGames < 100001 )
+                if ( _nGames < 10001 )
                 {
                     gameNameText.text = _nGames.ToString();
                     NewGame( addToDatabase: false );
@@ -105,7 +105,7 @@ namespace Klondike
                         unsovalbleText.text = _impossibleGames.ToString();
                     }
 
-                    if ( _nGames == 100001 )
+                    if ( _nGames == 10001 )
                         _stats.SaveToFile();
                 }
             }  

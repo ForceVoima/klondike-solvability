@@ -401,7 +401,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 22352535}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -924,7 +924,7 @@ PrefabInstance:
     - target: {fileID: 8456688340382728931, guid: c6d6413b97b9dd745b64868a8a5d0b2a,
         type: 3}
       propertyPath: m_Name
-      value: C7
+      value: C07
       objectReference: {fileID: 0}
     - target: {fileID: 8456688340382728931, guid: c6d6413b97b9dd745b64868a8a5d0b2a,
         type: 3}
@@ -1009,7 +1009,7 @@ PrefabInstance:
     - target: {fileID: 8456688340382728931, guid: 46c27846b8ba3b9458c654a64e931647,
         type: 3}
       propertyPath: m_Name
-      value: C8
+      value: C08
       objectReference: {fileID: 0}
     - target: {fileID: 8456688340382728931, guid: 46c27846b8ba3b9458c654a64e931647,
         type: 3}
@@ -1312,7 +1312,7 @@ PrefabInstance:
     - target: {fileID: 8456688340382728931, guid: 453bb54256c15f04d90353ee16c0c2fd,
         type: 3}
       propertyPath: m_Name
-      value: H13
+      value: HK
       objectReference: {fileID: 0}
     - target: {fileID: 8456688340382728931, guid: 453bb54256c15f04d90353ee16c0c2fd,
         type: 3}
@@ -1409,7 +1409,7 @@ PrefabInstance:
     - target: {fileID: 8456688340382728931, guid: 2b6e8720a774e1d4bacec5f53c82a1e1,
         type: 3}
       propertyPath: m_Name
-      value: S11
+      value: SJ
       objectReference: {fileID: 0}
     - target: {fileID: 8456688340382728931, guid: 2b6e8720a774e1d4bacec5f53c82a1e1,
         type: 3}
@@ -2440,7 +2440,7 @@ PrefabInstance:
     - target: {fileID: 8456688340382728931, guid: 4317275a6dc7aa14393ff2bc3d8ffa8b,
         type: 3}
       propertyPath: m_Name
-      value: C6
+      value: C06
       objectReference: {fileID: 0}
     - target: {fileID: 8456688340382728931, guid: 4317275a6dc7aa14393ff2bc3d8ffa8b,
         type: 3}
@@ -2667,7 +2667,7 @@ PrefabInstance:
     - target: {fileID: 8456688340382728931, guid: 4299834c5990a234eb4a1be474eaea48,
         type: 3}
       propertyPath: m_Name
-      value: H01
+      value: HA
       objectReference: {fileID: 0}
     - target: {fileID: 8456688340382728931, guid: 4299834c5990a234eb4a1be474eaea48,
         type: 3}
@@ -2972,7 +2972,7 @@ PrefabInstance:
     - target: {fileID: 8456688340382728931, guid: 0667d1f30b4b41240867a34d3f9597a3,
         type: 3}
       propertyPath: m_Name
-      value: H12
+      value: HQ
       objectReference: {fileID: 0}
     - target: {fileID: 8456688340382728931, guid: 0667d1f30b4b41240867a34d3f9597a3,
         type: 3}
@@ -3149,7 +3149,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 473803768}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -3580,7 +3580,7 @@ PrefabInstance:
     - target: {fileID: 8456688340382728931, guid: 1e29f43b5c018af42bf3f2625b4812ff,
         type: 3}
       propertyPath: m_Name
-      value: D01
+      value: DA
       objectReference: {fileID: 0}
     - target: {fileID: 8456688340382728931, guid: 1e29f43b5c018af42bf3f2625b4812ff,
         type: 3}
@@ -3677,7 +3677,7 @@ PrefabInstance:
     - target: {fileID: 8456688340382728931, guid: fcc61c30002517d47972bf74bd9206a3,
         type: 3}
       propertyPath: m_Name
-      value: S13
+      value: SK
       objectReference: {fileID: 0}
     - target: {fileID: 8456688340382728931, guid: fcc61c30002517d47972bf74bd9206a3,
         type: 3}
@@ -3774,7 +3774,7 @@ PrefabInstance:
     - target: {fileID: 8456688340382728931, guid: abf57ab24e834f34cbf9fd37b290f20d,
         type: 3}
       propertyPath: m_Name
-      value: C11
+      value: CJ
       objectReference: {fileID: 0}
     - target: {fileID: 8456688340382728931, guid: abf57ab24e834f34cbf9fd37b290f20d,
         type: 3}
@@ -3848,6 +3848,7 @@ MonoBehaviour:
   _waste: {fileID: 530659388}
   _moves: []
   _currentMove:
+    moveNumber: 0
     type: 0
     sourceCard: {fileID: 0}
     sourcePile: {fileID: 0}
@@ -3855,6 +3856,7 @@ MonoBehaviour:
     targetPile: {fileID: 0}
     targetIndex: 0
     confirmed: 0
+  _moveNumber: 0
 --- !u!114 &644289070 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3841778413024190695, guid: e3125e9f685b6c4468c5f6ead513da58,
@@ -3937,7 +3939,7 @@ PrefabInstance:
     - target: {fileID: 8456688340382728931, guid: 04ca8191c4e57c94b92c0ffbe8ebd854,
         type: 3}
       propertyPath: m_Name
-      value: S01
+      value: SA
       objectReference: {fileID: 0}
     - target: {fileID: 8456688340382728931, guid: 04ca8191c4e57c94b92c0ffbe8ebd854,
         type: 3}
@@ -5126,7 +5128,7 @@ PrefabInstance:
     - target: {fileID: 8456688340382728931, guid: b138f6b036e361d48920a62e071e18dd,
         type: 3}
       propertyPath: m_Name
-      value: D11
+      value: DJ
       objectReference: {fileID: 0}
     - target: {fileID: 8456688340382728931, guid: b138f6b036e361d48920a62e071e18dd,
         type: 3}
@@ -5302,7 +5304,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 878243531}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -5797,7 +5799,7 @@ PrefabInstance:
     - target: {fileID: 8456688340382728931, guid: e1fe179d079544a488de72ad6af51e74,
         type: 3}
       propertyPath: m_Name
-      value: C9
+      value: C09
       objectReference: {fileID: 0}
     - target: {fileID: 8456688340382728931, guid: e1fe179d079544a488de72ad6af51e74,
         type: 3}
@@ -6731,7 +6733,7 @@ PrefabInstance:
     - target: {fileID: 8456688340382728931, guid: 3abfe288fac137044baf715f8d143366,
         type: 3}
       propertyPath: m_Name
-      value: C5
+      value: C05
       objectReference: {fileID: 0}
     - target: {fileID: 8456688340382728931, guid: 3abfe288fac137044baf715f8d143366,
         type: 3}
@@ -6927,7 +6929,7 @@ PrefabInstance:
     - target: {fileID: 8456688340382728931, guid: e3125e9f685b6c4468c5f6ead513da58,
         type: 3}
       propertyPath: m_Name
-      value: D12
+      value: DQ
       objectReference: {fileID: 0}
     - target: {fileID: 8456688340382728931, guid: e3125e9f685b6c4468c5f6ead513da58,
         type: 3}
@@ -7024,7 +7026,7 @@ PrefabInstance:
     - target: {fileID: 8456688340382728931, guid: ea09a2c891c018a48baab01d7e4d419f,
         type: 3}
       propertyPath: m_Name
-      value: C3
+      value: C03
       objectReference: {fileID: 0}
     - target: {fileID: 8456688340382728931, guid: ea09a2c891c018a48baab01d7e4d419f,
         type: 3}
@@ -7813,7 +7815,7 @@ PrefabInstance:
     - target: {fileID: 8456688340382728931, guid: 6caefa94081dff347808a81503c8ae44,
         type: 3}
       propertyPath: m_Name
-      value: C4
+      value: C04
       objectReference: {fileID: 0}
     - target: {fileID: 8456688340382728931, guid: 6caefa94081dff347808a81503c8ae44,
         type: 3}
@@ -8671,7 +8673,7 @@ PrefabInstance:
     - target: {fileID: 8456688340382728931, guid: a5af8655138be3a4e9d9cc1417d712ea,
         type: 3}
       propertyPath: m_Name
-      value: C1
+      value: CA
       objectReference: {fileID: 0}
     - target: {fileID: 8456688340382728931, guid: a5af8655138be3a4e9d9cc1417d712ea,
         type: 3}
@@ -9053,7 +9055,7 @@ PrefabInstance:
     - target: {fileID: 8456688340382728931, guid: 9588780fa268c6441b1f3696a4ccea34,
         type: 3}
       propertyPath: m_Name
-      value: S12
+      value: SQ
       objectReference: {fileID: 0}
     - target: {fileID: 8456688340382728931, guid: 9588780fa268c6441b1f3696a4ccea34,
         type: 3}
@@ -9156,7 +9158,7 @@ PrefabInstance:
     - target: {fileID: 8456688340382728931, guid: 75e6602dccbc27c47a03dea8731c19d8,
         type: 3}
       propertyPath: m_Name
-      value: H11
+      value: HJ
       objectReference: {fileID: 0}
     - target: {fileID: 8456688340382728931, guid: 75e6602dccbc27c47a03dea8731c19d8,
         type: 3}
@@ -9583,7 +9585,7 @@ PrefabInstance:
     - target: {fileID: 8456688340382728931, guid: be11242e365626c4c8b8ba1ae8ea2ca0,
         type: 3}
       propertyPath: m_Name
-      value: C13
+      value: CK
       objectReference: {fileID: 0}
     - target: {fileID: 8456688340382728931, guid: be11242e365626c4c8b8ba1ae8ea2ca0,
         type: 3}
@@ -9680,7 +9682,7 @@ PrefabInstance:
     - target: {fileID: 8456688340382728931, guid: 33cc51489e9684f4fbb3f5c70876f161,
         type: 3}
       propertyPath: m_Name
-      value: C2
+      value: C02
       objectReference: {fileID: 0}
     - target: {fileID: 8456688340382728931, guid: 33cc51489e9684f4fbb3f5c70876f161,
         type: 3}
@@ -10621,7 +10623,7 @@ PrefabInstance:
     - target: {fileID: 8456688340382728931, guid: d2f5f41b70c01c64296ce27b4805c9d4,
         type: 3}
       propertyPath: m_Name
-      value: D13
+      value: DK
       objectReference: {fileID: 0}
     - target: {fileID: 8456688340382728931, guid: d2f5f41b70c01c64296ce27b4805c9d4,
         type: 3}
@@ -10713,7 +10715,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2067449352}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -10991,7 +10993,7 @@ PrefabInstance:
     - target: {fileID: 8456688340382728931, guid: f7bdab97ae2012b43bd2adb0f60cac45,
         type: 3}
       propertyPath: m_Name
-      value: C12
+      value: CQ
       objectReference: {fileID: 0}
     - target: {fileID: 8456688340382728931, guid: f7bdab97ae2012b43bd2adb0f60cac45,
         type: 3}

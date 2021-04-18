@@ -33,6 +33,7 @@ namespace Klondike
                      _status == CardStatus.Open ||
                      _status == CardStatus.Blocked );
         } }
+        public bool OffTable { get { return ( _status == CardStatus.Stock || _status == CardStatus.Foundation); } }
         [SerializeField] private Effect _currentEffect = Effect.Normal;
         private CardPile _parent;
         public CardPile Parent { get { return _parent; } }
@@ -62,6 +63,8 @@ namespace Klondike
         [SerializeField] private Renderer _outlineRenderer;
         [SerializeField] private BoxCollider _boxCollider;
         [SerializeField] private Rigidbody _rigidBody;
+
+        public bool _debug = false;
 
         private Vector3 _original = new Vector3();
         private Vector3 _offset = new Vector3();
@@ -112,7 +115,7 @@ namespace Klondike
                 _suitDown = Stock.Instance.RequestCard( _suit, _rank-1 );
 
             _status = CardStatus.Stock;
-            _restrictions = new Restrictions();
+            _restrictions = new Restrictions(name);
             _blockList = new List<Card>();
             _solverList = new List<Card>();
             _solved = true;
@@ -229,7 +232,7 @@ namespace Klondike
             _boxCollider.enabled = false;
             _rigidBody.isKinematic = true;
             _status = CardStatus.Stock;
-            _restrictions = new Restrictions();
+            _restrictions = new Restrictions(name);
         }
 
         public void Highlight(Effect code)
@@ -271,6 +274,7 @@ namespace Klondike
             return string.Concat( suit, Rank.ToString() );
         }
 
+        #region StatusChecks
         private void StatusCheck(PileType pile)
         {
             if ( ( _currentEffect == Effect.LowPriority ||
@@ -311,12 +315,7 @@ namespace Klondike
                 // Open card from closed state:
                 if ( _status != CardStatus.Open && _status != CardStatus.Stock )
                 {
-                    if ( _status == CardStatus.Closed )
-                        GameMaster.Instance.CardOpened();
-
-                    _status = CardStatus.Open;
-                    AIMaster.Instance.UpdateSolvable( _suit );
-                    SetColor( Settings.Instance.open );
+                    Opened();
                     return;
                 }
                 else if ( _status == CardStatus.Stock )
@@ -337,6 +336,19 @@ namespace Klondike
             _solverBLocked = false;
             _blockedCards = null;
             Highlight( Effect.Normal );
+            _restrictions.pile = 0;
+            _restrictions.position = 0;
+        }
+
+        private void Opened()
+        {
+            if ( _status == CardStatus.Closed )
+                GameMaster.Instance.CardOpened();
+
+            _status = CardStatus.Open;
+            AIMaster.Instance.UpdateSolvable( _suit );
+            SetColor( Settings.Instance.open );
+            cardAbove = null;
         }
 
         public void Blocked(Card byCard)
@@ -359,6 +371,9 @@ namespace Klondike
             cardAbove = null;
             AIMaster.Instance.UpdateSolvable( _suit );
         }
+        #endregion StatusChecks
+
+        #region RecursiveMessages
 
         public void SuitUpRecursiveUpdate()
         {
@@ -388,6 +403,24 @@ namespace Klondike
                     _suitUp.RecursiveSolvable( false );
             }
         }
+
+        public void RecursiveSuitDown(List<Card> blockList, List<Card> solverList)
+        {
+            if ( OnTable )
+            {
+                if ( _status == CardStatus.Blocked )
+                    blockList.Add( this );
+                else
+                    solverList.Add( this );
+            }
+
+            if ( _currentEffect != Effect.Solvable && _status != CardStatus.Foundation )
+                Highlight( Effect.MustSuitSolve );
+
+            if ( _rank > 1 )
+                _suitDown.RecursiveSuitDown( blockList, solverList );
+        }
+        #endregion RecursiveMessages
 
         public bool SameAs(Card card)
         {
@@ -420,76 +453,111 @@ namespace Klondike
 
             if ( _solved || !OnTable )
                 return;
+
+            if (_debug)
+                Debug.Log( name + " UpdateRoutes called");
             
             _routeAlocked = _solverALocked;
             _routeBlocked = _solverBLocked;
 
-            if ( !_solverALocked )
-                _routeAlocked = !_solverA.Available( _restrictions, _blockList, _solverList );
-            else
+            if ( _routeAlocked && !_routeBlocked )
+            {
                 _blockList.Add( _solverA );
-
-            if ( !_solverBLocked )
-                _routeBlocked = !_solverB.Available( _restrictions, _blockList, _solverList );
-            else
+                _routeBlocked = !_solverB.Available( _restrictions, _blockList, _solverList, _debug );
+            }
+            else if ( !_routeAlocked && _routeBlocked )
+            {
+                _routeAlocked = !_solverA.Available( _restrictions, _blockList, _solverList, _debug );
                 _blockList.Add( _solverB );
+            }
+            else if ( _routeAlocked && _routeBlocked )
+            {
+                _blockList.Add( _solverA );
+                _blockList.Add( _solverB );
+            }
+            else
+            {
+                if ( _solverA.OffTable && _solverB.OffTable )
+                {
+                    if ( _debug )
+                        Debug.Log( name + " | both " + _solverA.name + " & " + _solverB.name + " off table, single A()");
+
+                    _routeAlocked = !_solverA.Available( _restrictions, _blockList, _solverList, _debug );
+                    _routeBlocked = _routeAlocked;    
+                    _solverList.Add( _solverB );
+                }
+                else
+                {
+                    _routeAlocked = !_solverA.Available( _restrictions, _blockList, _solverList, _debug );
+                    _routeBlocked = !_solverB.Available( _restrictions, _blockList, _solverList, _debug );
+                }
+            }
 
             if ( _suitBlocked )
                 _blockList.Add( _suitBlocker );
 
             if ( _suitBlocked && _routeAlocked && _routeBlocked )
             {
+                if (_debug)
+                    Debug.Log( name + " I'm totally unsolvable in any way!");
+
                 SetColor(Settings.Instance.block);
                 Highlight( Effect.Normal );
+                return;
             }
-            else if ( _routeAlocked && _routeBlocked )
+            else
+            {
+                NormalColor();
+            }
+
+            if ( _routeAlocked && _routeBlocked )
             {
                 Highlight( Effect.MustSuitSolve );
                 _suitDown.RecursiveSuitDown( _blockList, _solverList );
             }
         }
 
-        public void RecursiveSuitDown(List<Card> blockList, List<Card> solverList)
+        public bool Available(Restrictions restrictions, List<Card> blocklist, List<Card> solveList, bool debugMessages = false)
         {
-            if ( OnTable )
-            {
-                if ( _status == CardStatus.Blocked )
-                    blockList.Add( this );
-                else
-                    solverList.Add( this );
-            }
+            if (debugMessages)
+                Debug.Log( name + "(" + _status + ") Available() called" );
 
-            if ( _currentEffect != Effect.Solvable && _status != CardStatus.Foundation )
-                Highlight( Effect.MustSuitSolve );
-
-            if ( _rank > 1 )
-                _suitDown.RecursiveSuitDown( blockList, solverList );
-        }
-
-        public bool Available(Restrictions restrictions, List<Card> blocklist, List<Card> solveList)
-        {
             if ( _status == CardStatus.Closed || _status == CardStatus.Open )
             {
-                if ( this._restrictions.pile == restrictions.pile &&
+                if ( !_solved &&
+                     this._restrictions.pile == restrictions.pile &&
                      this._restrictions.position > restrictions.position )
                 {
                     blocklist.Add( this );
+                    
+                    if (debugMessages)
+                        Debug.Log( name + " I'm under " + restrictions.name + " and unavailable for solving! False");
+
                     return false;
                 }
 
                 if ( cardAbove != null )
                 {
-                    bool pos = cardAbove.AboveCardPossible( restrictions, this._restrictions );
+                    if (debugMessages)
+                        Debug.Log( name + " I'm available not under "+ restrictions.name +", let's check aboveCard: " + cardAbove.name );
+
+                    bool pos = cardAbove.AboveCardSolvable( restrictions, this._restrictions, debugMessages );
 
                     if ( pos )
                         solveList.Add( this );
                     else
                         blocklist.Add( this );
+
+                    if (debugMessages)
+                        Debug.Log( name + " aboveCard: " + cardAbove.name + " ACS returned: " + pos);
                         
                     return pos;
                 }
                 else
                 {
+                    if (debugMessages)
+                        Debug.Log( name + " | A | I'm top card and available!");
+
                     solveList.Add( this );
                     return true;
                 }
@@ -499,8 +567,11 @@ namespace Klondike
                 if ( _rank == 13)
                     return true;
 
-                bool a = _solverA.Available( restrictions, blocklist, solveList );
-                bool b = _solverB.Available( restrictions, blocklist, solveList );
+                bool a = _solverA.Available( restrictions, blocklist, solveList, debugMessages );
+                bool b = _solverB.Available( restrictions, blocklist, solveList, debugMessages );
+
+                if ( debugMessages )
+                    Debug.Log( name + " Available() " +_solverA.name + ": " + a + " | "+ _solverB.name +": " + b);
 
                 solveList.Add( this );
 
@@ -508,10 +579,19 @@ namespace Klondike
             }
 
             else if ( _status == CardStatus.Blocked )
+            {
+                if (debugMessages)
+                    Debug.Log( name + " | A | I'm blocked and unavailable!");
+
                 blocklist.Add( this );
+                return false;
+            }
 
             else if ( _status == CardStatus.Foundation )
             {
+                if (debugMessages)
+                    Debug.Log( name + " | A | I'm in Foundation and assumed available!");
+                
                 solveList.Add( this );
                 return true;
             }
@@ -519,78 +599,150 @@ namespace Klondike
             return false;
         }
 
-        public bool AboveCardPossible(Restrictions limitA, Restrictions limitB)
+        public bool AboveCardSolvable(Restrictions limitA, Restrictions limitB, bool debugMessages = false)
         {
+            if (debugMessages)
+                Debug.Log( name + " | ACS | called");
+
             if ( KingOrAce )
             {
                 if ( _status == CardStatus.Closed )
-                    return cardAbove.AboveCardPossible( limitA, limitB );
+                {
+                    if (debugMessages)
+                        Debug.Log( name + " | ACS | I'm King/Ace, skip to card above me " + cardAbove.name );
+
+                    return cardAbove.AboveCardSolvable( limitA, limitB );
+                }
                 else
+                {
+                    if (debugMessages)
+                        Debug.Log( name + " | ACS | I'm top of the pile and solvable! True!");
+
                     return true;
+                }
             }
 
             bool routeSuit = !_suitBlocked;
             bool routeA = !_solverALocked;
             bool routeB = !_solverBLocked;
 
-            if ( !_solverALocked )
-                routeA = _solverA.AvailableAbove( limitA, limitB );
+            if ( routeA && !routeB )
+            {
+                routeA = _solverA.AvailableAbove( limitA, limitB, debugMessages );
+            }
+            else if ( !routeA && routeB )
+            {
+                routeB = _solverB.AvailableAbove( limitA, limitB, debugMessages );
+            }
+            else if ( routeA && routeB )
+            {
+                if ( _solverA.OffTable && _solverB.OffTable )
+                {
+                    if ( _debug )
+                        Debug.Log( name + " | ACS | both " + _solverA.name + " & " + _solverB.name + " off table, single A()");
 
-            if ( !_solverBLocked )
-                routeB = _solverB.AvailableAbove( limitA, limitB );
+                    routeA = _solverA.AvailableAbove( limitA, limitB, debugMessages );
+                    routeB = routeA;
+                }
+                else
+                {
+                    routeA = _solverA.AvailableAbove( limitA, limitB, debugMessages );
+                    routeB = _solverB.AvailableAbove( limitA, limitB, debugMessages );
+                }
+            }
+
+            if ( debugMessages )
+                Debug.Log( name + " | ACS | "+_solverA.name + ": " + routeA + " | "+ _solverB.name +": " + routeB);
 
             if ( !routeSuit && !routeA && !routeB )
+            {
+                if (debugMessages)
+                    Debug.Log( name + " ACS | I'm not solvable with these limits!" );
+
                 return false;
+            }
             else
             {
-                if ( _status == CardStatus.Open || _status == CardStatus.Foundation )
+                if ( _status == CardStatus.Open ||
+                     _status == CardStatus.Blocked )
+                {
+                    if (debugMessages)
+                        Debug.Log(name + " | ACS | I'm top of pile and solvable!" );
+
                     return true;
+                }
                 else
                 {
                     try
                     {
-                        bool a = cardAbove.AboveCardPossible( limitA, limitB );
+                        if (debugMessages)
+                            Debug.Log( name + " | ACS | I'm solvable, but lets check above card " + cardAbove.name);
+
+                        bool a = cardAbove.AboveCardSolvable( limitA, limitB, debugMessages );
+
+                        if (debugMessages)
+                            Debug.Log( name + " | ACS | abovecard " + cardAbove.name + " returned " + a);
+
                         return a;
                     }
-                    catch (System.NullReferenceException exception)
+                    catch (System.NullReferenceException e)
                     {
-                        Debug.LogError(name + " Status: " + _status + " E: " + exception);
-                        return true;
+                        Debug.LogError( name +"("+ _status + ") | ACP | aboveCard missing! " + e );
+                        return false;
                     }
                 }
             }
         }
 
-        public bool AvailableAbove(Restrictions limitA, Restrictions limitB)
+        public bool AvailableAbove(Restrictions limitA, Restrictions limitB, bool debugMessages = false )
         {
+            if (debugMessages)
+                Debug.Log( name + "(" + _status + ") | AA | called " );
+
             if ( _status == CardStatus.Closed || _status == CardStatus.Open )
             {
+                if (debugMessages && _solved)
+                {
+                    Debug.Log( name + " | AA | Not buried in piles and available!");
+                }
+
                 if ( this._restrictions.pile == limitA.pile &&
                      this._restrictions.position > limitA.position )
                 {
+                    if (debugMessages)
+                        Debug.Log( name + " I'm under " + limitA.name + " and not available!");
+
                     return false;
                 }
                 if ( this._restrictions.pile == limitB.pile &&
                      this._restrictions.position > limitB.position )
                 {
+                    if (debugMessages)
+                        Debug.Log( name + " I'm under " + limitB.name + " and not available!");
+
                     return false;
                 }
 
                 return true;
             }
-            else if ( _status == CardStatus.Stock )
+            else if ( _status == CardStatus.Stock || _status == CardStatus.Foundation )
             {
                 if ( _rank == 13)
                     return true;
 
-                bool a = _solverA.AvailableAbove( limitA, limitB );
-                bool b = _solverB.AvailableAbove( limitA, limitB );
+                bool a = _solverA.AvailableAbove( limitA, limitB, debugMessages );
+                bool b = _solverB.AvailableAbove( limitA, limitB, debugMessages );
+
+                
+                if ( debugMessages )
+                    Debug.Log( name + " | AA | " +_solverA.name + ": " + a + " | "+ _solverB.name +": " + b);
 
                 return (a || b);
             }
             return false;
         }
 
+    #region CardHover
         public void SaveOffset(Vector3 reference)
         {
             _original = transform.position;
@@ -638,4 +790,5 @@ namespace Klondike
                 SetColor( Settings.Instance.open );
         }
     }
+    #endregion CardHover
 }
