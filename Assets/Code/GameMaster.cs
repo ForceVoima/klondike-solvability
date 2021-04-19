@@ -23,6 +23,7 @@ namespace Klondike
         private int _totalGames;
         private int _wonGames;
         private float _winRate;
+        private int _gamesToGenerate = 1000;
         private int _nGames = 0;
         private int _impossibleGames = 0;
 
@@ -41,6 +42,7 @@ namespace Klondike
 
         public GameDatabase _database;
         public bool massDataMode = false;
+        private bool _newUnsovableGame = false;
 
         public static GameMaster _instance;
         public static GameMaster Instance
@@ -93,7 +95,7 @@ namespace Klondike
             if ( massDataMode )
             {
 
-                if ( _nGames < 10001 )
+                if ( _nGames < _gamesToGenerate + 1 )
                 {
                     gameNameText.text = _nGames.ToString();
                     NewGame( addToDatabase: false );
@@ -105,10 +107,19 @@ namespace Klondike
                         unsovalbleText.text = _impossibleGames.ToString();
                     }
 
-                    if ( _nGames == 10001 )
+                    if ( _stats.SpecialUnsolvable() )
+                    {
+                        _database.allGames.Add( _currentGame );
+                        _gameSelector = _database.allGames.Count - 1;
+                    }
+
+                    if ( _nGames == _gamesToGenerate + 1 )
                         _stats.SaveToFile();
                 }
-            }  
+            }
+
+            if ( _newUnsovableGame )
+                NewRareUnsovableGame();
         }
 
         private void NewDeal(bool addToDatabase = true)
@@ -473,10 +484,31 @@ namespace Klondike
                 _buildPiles[i].PileAnalysis( allCards: true );
             }
 
-            if ( _stats.Unsovable() )
-                unsovalbleText.text = "Unsolvable";
-            else
-                unsovalbleText.text = "";
+            if ( !massDataMode )
+            {
+                if ( _stats.Unsovable() )
+                    unsovalbleText.text = "Unsolvable";
+                else
+                    unsovalbleText.text = "";
+            }
+        }
+
+        public void NewRareUnsovableGame()
+        {
+            if ( !_newUnsovableGame )
+            {
+                _newUnsovableGame = true;
+            }
+
+            gameNameText.text = _nGames.ToString();
+            NewGame( addToDatabase: false );
+            _nGames++;
+
+            if ( _stats.SpecialUnsolvable() )
+            {
+                _gameSelector = _database.allGames.Count - 1;
+                _newUnsovableGame = false;
+            }
         }
     }
 }

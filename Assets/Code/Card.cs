@@ -50,10 +50,12 @@ namespace Klondike
         [SerializeField] private Card[] _blockedCards;
 
         [SerializeField] private bool _suitBlocked = false;
-        [SerializeField] private bool _solverALocked = false;
-        [SerializeField] private bool _solverBLocked = false;
-        [SerializeField] private bool _routeAlocked = false;
-        [SerializeField] private bool _routeBlocked = false;
+        [SerializeField] private bool _aSolverBlocked = false;
+        [SerializeField] private bool _bSolverBLocked = false;
+        [SerializeField] private bool _aRouteBlocked = false;
+        [SerializeField] private bool _bRouteBlocked = false;
+        [SerializeField] private bool _suitRouteBlocked = false;
+        //[SerializeField] private bool _parallelSuitRouteBlocked = false;
         [SerializeField] private bool _solved = true;
         private int _solversBlocked = 0;
         [SerializeField] private Restrictions _restrictions;
@@ -170,14 +172,14 @@ namespace Klondike
                 if ( !KingOrAce &&
                      cards[i].SameAs( _solverA ) )
                 {
-                    _solverALocked = true;
+                    _aSolverBlocked = true;
                     _solversBlocked++;
                 }
 
                 if ( !KingOrAce && 
                      cards[i].SameAs( _solverB ) )
                 {
-                    _solverBLocked = true;
+                    _bSolverBLocked = true;
                     _solversBlocked++;
                 }
 
@@ -196,7 +198,7 @@ namespace Klondike
                     _parallel.Highlight(Effect.LowPriority);
                     Highlight( Effect.SolverBlock );
                 }
-                else if ( _solverALocked && _solverBLocked && !_suitBlocked )
+                else if ( _aSolverBlocked && _bSolverBLocked && !_suitBlocked )
                 {
                     Highlight( Effect.MustSuitSolve );
                     _solverA.Highlight( Effect.MustSuitSolve );
@@ -207,7 +209,7 @@ namespace Klondike
                 cardBelow = _blockedCards[ _blockedCards.Length - 1 ];
                 cardBelow.cardAbove = this;
 
-                if ( _solverALocked && _solverBLocked && _suitBlocked )
+                if ( _aSolverBlocked && _bSolverBLocked && _suitBlocked )
                 {
                     SetColor( Settings.Instance.block );
                     _suitBlocker.SetColor( Settings.Instance.block );
@@ -220,8 +222,8 @@ namespace Klondike
         public void Reset()
         {
             _suitBlocked = false;
-            _solverALocked = false;
-            _solverBLocked = false;
+            _aSolverBlocked = false;
+            _bSolverBLocked = false;
             _solved = true;
             cardAbove = null;
             cardBelow = null;
@@ -332,12 +334,10 @@ namespace Klondike
         public void Solved()
         {
             _solved = true;
-            _solverALocked = false;
-            _solverBLocked = false;
+            _aSolverBlocked = false;
+            _bSolverBLocked = false;
             _blockedCards = null;
             Highlight( Effect.Normal );
-            _restrictions.pile = 0;
-            _restrictions.position = 0;
         }
 
         private void Opened()
@@ -358,8 +358,11 @@ namespace Klondike
             cardAbove.cardBelow = this;
             RecursiveSolvable( false );
 
-            _solveeA.UpdateRoutes();
-            _solveeB.UpdateRoutes();
+            if ( _rank > 2 )
+            {
+                _solveeA.UpdateRoutes();
+                _solveeB.UpdateRoutes();
+            }
 
             if ( _rank < 13 )
                 _suitUp.SuitUpRecursiveUpdate();
@@ -404,22 +407,6 @@ namespace Klondike
             }
         }
 
-        public void RecursiveSuitDown(List<Card> blockList, List<Card> solverList)
-        {
-            if ( OnTable )
-            {
-                if ( _status == CardStatus.Blocked )
-                    blockList.Add( this );
-                else
-                    solverList.Add( this );
-            }
-
-            if ( _currentEffect != Effect.Solvable && _status != CardStatus.Foundation )
-                Highlight( Effect.MustSuitSolve );
-
-            if ( _rank > 1 )
-                _suitDown.RecursiveSuitDown( blockList, solverList );
-        }
         #endregion RecursiveMessages
 
         public bool SameAs(Card card)
@@ -440,7 +427,7 @@ namespace Klondike
             UpdateRoutes();
 
             if ( _blockedCards.Length > 0 || allCards )
-                Statistics.Instance.AdvancedReport( _suitBlocked, _routeAlocked, _routeBlocked );
+                Statistics.Instance.AdvancedReport( _suitRouteBlocked, _aRouteBlocked, _bRouteBlocked );
         }
 
         public void UpdateRoutes()
@@ -457,20 +444,21 @@ namespace Klondike
             if (_debug)
                 Debug.Log( name + " UpdateRoutes called");
             
-            _routeAlocked = _solverALocked;
-            _routeBlocked = _solverBLocked;
+            _aRouteBlocked = _aSolverBlocked;
+            _bRouteBlocked = _bSolverBLocked;
+            _suitRouteBlocked = _suitBlocked;
 
-            if ( _routeAlocked && !_routeBlocked )
+            if ( _aRouteBlocked && !_bRouteBlocked )
             {
                 _blockList.Add( _solverA );
-                _routeBlocked = !_solverB.Available( _restrictions, _blockList, _solverList, _debug );
+                _bRouteBlocked = !_solverB.Available( _restrictions, _blockList, _solverList, _debug );
             }
-            else if ( !_routeAlocked && _routeBlocked )
+            else if ( !_aRouteBlocked && _bRouteBlocked )
             {
-                _routeAlocked = !_solverA.Available( _restrictions, _blockList, _solverList, _debug );
+                _aRouteBlocked = !_solverA.Available( _restrictions, _blockList, _solverList, _debug );
                 _blockList.Add( _solverB );
             }
-            else if ( _routeAlocked && _routeBlocked )
+            else if ( _aRouteBlocked && _bRouteBlocked )
             {
                 _blockList.Add( _solverA );
                 _blockList.Add( _solverB );
@@ -482,21 +470,39 @@ namespace Klondike
                     if ( _debug )
                         Debug.Log( name + " | both " + _solverA.name + " & " + _solverB.name + " off table, single A()");
 
-                    _routeAlocked = !_solverA.Available( _restrictions, _blockList, _solverList, _debug );
-                    _routeBlocked = _routeAlocked;    
+                    _aRouteBlocked = !_solverA.Available( _restrictions, _blockList, _solverList, _debug );
+                    _bRouteBlocked = _aRouteBlocked;    
                     _solverList.Add( _solverB );
                 }
                 else
                 {
-                    _routeAlocked = !_solverA.Available( _restrictions, _blockList, _solverList, _debug );
-                    _routeBlocked = !_solverB.Available( _restrictions, _blockList, _solverList, _debug );
+                    _aRouteBlocked = !_solverA.Available( _restrictions, _blockList, _solverList, _debug );
+                    _bRouteBlocked = !_solverB.Available( _restrictions, _blockList, _solverList, _debug );
                 }
             }
 
             if ( _suitBlocked )
                 _blockList.Add( _suitBlocker );
+            else if ( _aRouteBlocked && _bRouteBlocked )
+            {
+                if (_debug)
+                    Debug.Log( name + " | Both solvers blocked, checking suit down!" );
 
-            if ( _suitBlocked && _routeAlocked && _routeBlocked )
+                Highlight( Effect.MustSuitSolve );
+                _suitRouteBlocked = !_suitDown.NextSuitAvailable( _restrictions, _blockList, _solverList, _debug);
+
+                if ( _debug && _suitRouteBlocked )
+                    Debug.Log( name + " Oh no! Suit cards are not solvable without me!");
+
+                /*
+                if ( _suitRouteBlocked)
+                {
+                    _parallelSuitRouteBlocked = ParallelSuitRoute( _restrictions, _blockList, _solverList, _debug );
+                }
+                */
+            }
+
+            if ( _suitRouteBlocked && _aRouteBlocked && _bRouteBlocked )
             {
                 if (_debug)
                     Debug.Log( name + " I'm totally unsolvable in any way!");
@@ -509,15 +515,9 @@ namespace Klondike
             {
                 NormalColor();
             }
-
-            if ( _routeAlocked && _routeBlocked )
-            {
-                Highlight( Effect.MustSuitSolve );
-                _suitDown.RecursiveSuitDown( _blockList, _solverList );
-            }
         }
 
-        public bool Available(Restrictions restrictions, List<Card> blocklist, List<Card> solveList, bool debugMessages = false)
+        private bool Available(Restrictions restrictions, List<Card> blocklist, List<Card> solveList, bool debugMessages = false)
         {
             if (debugMessages)
                 Debug.Log( name + "(" + _status + ") Available() called" );
@@ -599,7 +599,7 @@ namespace Klondike
             return false;
         }
 
-        public bool AboveCardSolvable(Restrictions limitA, Restrictions limitB, bool debugMessages = false)
+        private bool AboveCardSolvable(Restrictions limitA, Restrictions limitB, bool debugMessages = false)
         {
             if (debugMessages)
                 Debug.Log( name + " | ACS | called");
@@ -623,16 +623,16 @@ namespace Klondike
             }
 
             bool routeSuit = !_suitBlocked;
-            bool routeA = !_solverALocked;
-            bool routeB = !_solverBLocked;
+            bool routeA = !_aSolverBlocked;
+            bool routeB = !_bSolverBLocked;
 
             if ( routeA && !routeB )
             {
-                routeA = _solverA.AvailableAbove( limitA, limitB, debugMessages );
+                routeA = _solverA.NextSolverAvailable( limitA, limitB, debugMessages );
             }
             else if ( !routeA && routeB )
             {
-                routeB = _solverB.AvailableAbove( limitA, limitB, debugMessages );
+                routeB = _solverB.NextSolverAvailable( limitA, limitB, debugMessages );
             }
             else if ( routeA && routeB )
             {
@@ -641,13 +641,13 @@ namespace Klondike
                     if ( _debug )
                         Debug.Log( name + " | ACS | both " + _solverA.name + " & " + _solverB.name + " off table, single A()");
 
-                    routeA = _solverA.AvailableAbove( limitA, limitB, debugMessages );
+                    routeA = _solverA.NextSolverAvailable( limitA, limitB, debugMessages );
                     routeB = routeA;
                 }
                 else
                 {
-                    routeA = _solverA.AvailableAbove( limitA, limitB, debugMessages );
-                    routeB = _solverB.AvailableAbove( limitA, limitB, debugMessages );
+                    routeA = _solverA.NextSolverAvailable( limitA, limitB, debugMessages );
+                    routeB = _solverB.NextSolverAvailable( limitA, limitB, debugMessages );
                 }
             }
 
@@ -694,33 +694,36 @@ namespace Klondike
             }
         }
 
-        public bool AvailableAbove(Restrictions limitA, Restrictions limitB, bool debugMessages = false )
+        private bool NextSolverAvailable(Restrictions limitA, Restrictions limitB, bool debugMessages = false )
         {
             if (debugMessages)
                 Debug.Log( name + "(" + _status + ") | AA | called " );
 
             if ( _status == CardStatus.Closed || _status == CardStatus.Open )
             {
-                if (debugMessages && _solved)
-                {
-                    Debug.Log( name + " | AA | Not buried in piles and available!");
-                }
-
-                if ( this._restrictions.pile == limitA.pile &&
+                if ( !_solved &&
+                     this._restrictions.pile == limitA.pile &&
                      this._restrictions.position > limitA.position )
                 {
                     if (debugMessages)
-                        Debug.Log( name + " I'm under " + limitA.name + " and not available!");
+                        Debug.Log( name + ": False | I'm under " + limitA.name + " and not available!");
 
                     return false;
                 }
-                if ( this._restrictions.pile == limitB.pile &&
+
+                if ( !_solved &&
+                     this._restrictions.pile == limitB.pile &&
                      this._restrictions.position > limitB.position )
                 {
                     if (debugMessages)
-                        Debug.Log( name + " I'm under " + limitB.name + " and not available!");
+                        Debug.Log( name + ": False | I'm under " + limitB.name + " and not available!");
 
                     return false;
+                }
+                
+                if (debugMessages && _solved)
+                {
+                    Debug.Log( name + ": True | AA | Not buried in piles and available!");
                 }
 
                 return true;
@@ -730,8 +733,8 @@ namespace Klondike
                 if ( _rank == 13)
                     return true;
 
-                bool a = _solverA.AvailableAbove( limitA, limitB, debugMessages );
-                bool b = _solverB.AvailableAbove( limitA, limitB, debugMessages );
+                bool a = _solverA.NextSolverAvailable( limitA, limitB, debugMessages );
+                bool b = _solverB.NextSolverAvailable( limitA, limitB, debugMessages );
 
                 
                 if ( debugMessages )
@@ -739,8 +742,101 @@ namespace Klondike
 
                 return (a || b);
             }
+            else if ( _status == CardStatus.Blocked )
+            {
+                if ( debugMessages && cardAbove != null )
+                    Debug.Log( name + ": False | I'm blocked under " + cardAbove.name );
+
+                return false;
+            }
             return false;
         }
+
+        private bool NextSuitAvailable(Restrictions limit, List<Card> blockList, List<Card> solverList, bool debugMessages = false)
+        {
+            if (debugMessages)
+                Debug.Log( name + "(" + _status + ") | NSA Called!" );
+
+            if ( !_solved )
+            {
+                if ( _status == CardStatus.Blocked )
+                {
+                    if (debugMessages)
+                        Debug.Log(name + " | NSA I'm blocked top card but let's assume I can be freed!");
+
+                    blockList.Add( this );
+                }
+                else if ( cardAbove != null )
+                {
+                    if (debugMessages)
+                        Debug.Log( name + " | NSA | Let's check: Abovecard " + cardAbove.name );
+
+                    bool acs = cardAbove.AboveCardSolvable( limit, limit, debugMessages);
+
+                    if ( !acs )
+                    {                        
+                        if (debugMessages)
+                            Debug.Log( name + " | NSA | Abovecard " + cardAbove.name + " returned false!" );
+
+                        blockList.Add( cardAbove );
+
+                        return false;
+                    }
+                    else if ( debugMessages )
+                        Debug.Log(name + " | NSA | Above cards OK!");
+                }
+                else if (debugMessages)
+                    Debug.Log(name + " | NSA I'm top card, no need to check above cards!");
+            }
+            else if ( _status == CardStatus.Blocked )
+            {
+                if (debugMessages && cardAbove != null)
+                    Debug.Log(name + " | NSA I'm blocked under " + cardAbove.name + " but let's assume I can be freed!");
+
+                blockList.Add( this );
+            }
+
+            if ( OnTable )
+            {
+                if ( _status == CardStatus.Blocked )
+                    blockList.Add( this );
+                else
+                    solverList.Add( this );
+            }
+
+            if ( _currentEffect != Effect.Solvable && _status != CardStatus.Foundation )
+                Highlight( Effect.MustSuitSolve );
+
+            if ( _rank > 1 )
+            {
+                if ( _status == CardStatus.Foundation )
+                {
+                    if (debugMessages)
+                        Debug.Log( name + " | NSA | I'm in Foundation, this is deep enough!");
+
+                    return true;
+                }
+
+                if (debugMessages)
+                    Debug.Log( name + "(" + _status + ") | NSA | Let's check next card: " + _suitDown.name );
+
+                return _suitDown.NextSuitAvailable( limit, blockList, solverList, debugMessages );
+            }
+            else
+            {
+                if (debugMessages)
+                    Debug.Log( name + " | NSA | I'm Ace, this is deep enough!");
+
+                return true;
+            }
+        }
+
+        /*
+        private bool ParallelSuitRoute( Restrictions limit, List<Card> blockList, List<Card> solverList, bool debugMessages )
+        {
+            return _suitUp.NextSuitAvailable(limit, blockList, solverList, debugMessages);
+        }
+        */
 
     #region CardHover
         public void SaveOffset(Vector3 reference)
@@ -780,7 +876,7 @@ namespace Klondike
 
         private void NormalColor()
         {
-            if ( _suitBlocked && _solverALocked && _solverBLocked )
+            if ( _suitRouteBlocked && _aRouteBlocked && _bRouteBlocked )
                 SetColor( Settings.Instance.block );
 
             else if ( _status == CardStatus.Closed )

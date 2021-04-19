@@ -163,5 +163,10 @@ namespace Klondike
         {
             return ( _advancedBlocks[5] > 0 );
         }
+
+        public bool SpecialUnsolvable()
+        {
+            return ( ( _advancedBlocks[5] > 0 ) && ( _blocks[5] == 0 ) );
+        }
     }
 }
