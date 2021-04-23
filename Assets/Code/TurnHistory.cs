@@ -44,8 +44,9 @@ namespace Klondike
             if ( _moves.Count <= 0 )
                 return;
 
-            int move = _moves[ _moves.Count-1 ].moveNumber;
-            _currentMove = _moves[ _moves.Count - 1 ];
+            int index = _moves.Count - 1;
+            int move = _moves[ index ].moveNumber;
+            _currentMove = _moves[ index ];
 
             while ( _currentMove.moveNumber == move )
             {
@@ -58,12 +59,27 @@ namespace Klondike
                 else if ( _currentMove.type == MoveType.ClosedToOpen )
                     ReturnToClosed( _currentMove );
 
-                _moves.RemoveAt( _moves.Count - 1 );
+                else if ( _currentMove.type == MoveType.TableToTable )
+                    ReturnToBuildPile( _currentMove );
 
-                if ( _moves.Count == 0 )
+                else if ( _currentMove.type == MoveType.WorryBack )
+                    ReturnToTable( _currentMove );
+
+                _moves.RemoveAt( index );
+                
+                index--;
+
+                if ( index < 0 )
                     break;
+
+                if ( _moves[ index ].moveNumber == move )
+                {
+                    _currentMove = _moves[ index ];
+                }
                 else
-                    _currentMove = _moves[ _moves.Count - 1 ];
+                {
+                    break;
+                }
             }
         }
 
@@ -126,6 +142,11 @@ namespace Klondike
         private void ReturnToClosed(Move move)
         {
             move.targetPile.ReturnTopCard( move.sourcePile );
+        }
+
+        private void ReturnToBuildPile(Move move)
+        {
+            move.targetPile.ReturnCard( move.sourceCard, move.sourcePile, move.sourceIndex );
         }
     }
 }

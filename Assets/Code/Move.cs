@@ -36,6 +36,19 @@ namespace Klondike
 
             else if ( source.Type == PileType.ClosedPile )
                 type = MoveType.ClosedToOpen;
+
+            else if ( source.Type == PileType.BuildPile )
+            {
+                if ( target.Type == PileType.BuildPile )
+                    type = MoveType.TableToTable;
+                else if ( target.Type == PileType.FoundationPile )
+                    type = MoveType.TableToFoundation;
+            }
+
+            else if ( source.Type == PileType.FoundationPile && target.Type == PileType.BuildPile )
+            {
+                type = MoveType.WorryBack;
+            }
         }
     }
 }

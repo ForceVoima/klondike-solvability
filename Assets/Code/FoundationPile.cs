@@ -65,6 +65,12 @@ namespace Klondike
             Suit suit = TopCard.Suit;
             int rank = TopCard.Rank;
 
+            TurnHistory.Instance.ReportMove(
+                card: TopCard,
+                source: this,
+                target: pile
+            );
+
             base.DealTopCard(pile);
             GameMaster.Instance.FoundationTakenCard();
             AIMaster.Instance.CardFounded( suit, rank-1 );

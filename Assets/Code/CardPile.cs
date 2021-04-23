@@ -41,6 +41,11 @@ namespace Klondike
 
             _numberOfCards++;
         }
+
+        public virtual void ReceiveToIndex(Card card, int index)
+        {
+        }
+        
         public virtual void DealTopCard(CardPile pile)
         {
             pile.ReceiveCard( _pile[ _numberOfCards-1 ]);
@@ -57,6 +62,10 @@ namespace Klondike
             pile.ReceiveCard( _pile[ _numberOfCards-1 ]);
             _pile[ _numberOfCards-1 ] = null;
             _numberOfCards--;
+        }
+
+        public virtual void ReturnCard(Card card, CardPile pile, int sourceIndex)
+        {
         }
 
         public virtual void ResetCards(Stock stock)
@@ -106,8 +115,9 @@ namespace Klondike
 
             while (i < _pile.Length)
             {
-                if ( _pile[i].Suit == suit && _pile[i].Rank == rank)
-                    return i;
+                if ( _pile[i] != null &&
+                     _pile[i].Suit == suit && _pile[i].Rank == rank )
+                     return i;
                 
                 i++;
             }
@@ -125,6 +135,10 @@ namespace Klondike
             {
                 _pile[i].RecordAdvancedStatistics( allCards );
             }
+        }
+
+        public virtual void PopulateHoverList(List<Card> cardList, Card card = null)
+        {
         }
     }
 }

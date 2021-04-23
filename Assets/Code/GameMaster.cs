@@ -23,7 +23,7 @@ namespace Klondike
         private int _totalGames;
         private int _wonGames;
         private float _winRate;
-        private int _gamesToGenerate = 1000;
+        [SerializeField] private int _gamesToGenerate = 1000;
         private int _nGames = 0;
         private int _impossibleGames = 0;
 
@@ -107,11 +107,13 @@ namespace Klondike
                         unsovalbleText.text = _impossibleGames.ToString();
                     }
 
+                    /*
                     if ( _stats.SpecialUnsolvable() )
                     {
                         _database.allGames.Add( _currentGame );
                         _gameSelector = _database.allGames.Count - 1;
                     }
+                    */
 
                     if ( _nGames == _gamesToGenerate + 1 )
                         _stats.SaveToFile();

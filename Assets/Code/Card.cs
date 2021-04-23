@@ -51,11 +51,11 @@ namespace Klondike
 
         [SerializeField] private bool _suitBlocked = false;
         [SerializeField] private bool _aSolverBlocked = false;
-        [SerializeField] private bool _bSolverBLocked = false;
+        [SerializeField] private bool _bSolverBlocked = false;
         [SerializeField] private bool _aRouteBlocked = false;
         [SerializeField] private bool _bRouteBlocked = false;
         [SerializeField] private bool _suitRouteBlocked = false;
-        //[SerializeField] private bool _parallelSuitRouteBlocked = false;
+        [SerializeField] private bool _parallelSuitRouteBlocked = false;
         [SerializeField] private bool _solved = true;
         private int _solversBlocked = 0;
         [SerializeField] private Restrictions _restrictions;
@@ -165,6 +165,8 @@ namespace Klondike
             _restrictions.pile = pileNumber;
             _restrictions.position = pileNumber - numberOfCards;
 
+            _solversBlocked = 0;
+
             for (int i = 0; i < numberOfCards; i++)
             {
                 _blockedCards[i] = cards[i];
@@ -179,7 +181,7 @@ namespace Klondike
                 if ( !KingOrAce && 
                      cards[i].SameAs( _solverB ) )
                 {
-                    _bSolverBLocked = true;
+                    _bSolverBlocked = true;
                     _solversBlocked++;
                 }
 
@@ -198,7 +200,7 @@ namespace Klondike
                     _parallel.Highlight(Effect.LowPriority);
                     Highlight( Effect.SolverBlock );
                 }
-                else if ( _aSolverBlocked && _bSolverBLocked && !_suitBlocked )
+                else if ( _aSolverBlocked && _bSolverBlocked && !_suitBlocked )
                 {
                     Highlight( Effect.MustSuitSolve );
                     _solverA.Highlight( Effect.MustSuitSolve );
@@ -209,7 +211,7 @@ namespace Klondike
                 cardBelow = _blockedCards[ _blockedCards.Length - 1 ];
                 cardBelow.cardAbove = this;
 
-                if ( _aSolverBlocked && _bSolverBLocked && _suitBlocked )
+                if ( _aSolverBlocked && _bSolverBlocked && _suitBlocked )
                 {
                     SetColor( Settings.Instance.block );
                     _suitBlocker.SetColor( Settings.Instance.block );
@@ -223,7 +225,7 @@ namespace Klondike
         {
             _suitBlocked = false;
             _aSolverBlocked = false;
-            _bSolverBLocked = false;
+            _bSolverBlocked = false;
             _solved = true;
             cardAbove = null;
             cardBelow = null;
@@ -333,9 +335,17 @@ namespace Klondike
 
         public void Solved()
         {
+            if ( _suitRouteBlocked && _aRouteBlocked && _bRouteBlocked )
+            {
+                _suitRouteBlocked = false;
+                _aRouteBlocked = false;
+                _bRouteBlocked = false;
+                SetColor( Settings.Instance.open );
+            }
+
             _solved = true;
             _aSolverBlocked = false;
-            _bSolverBLocked = false;
+            _bSolverBlocked = false;
             _blockedCards = null;
             Highlight( Effect.Normal );
         }
@@ -445,7 +455,7 @@ namespace Klondike
                 Debug.Log( name + " UpdateRoutes called");
             
             _aRouteBlocked = _aSolverBlocked;
-            _bRouteBlocked = _bSolverBLocked;
+            _bRouteBlocked = _bSolverBlocked;
             _suitRouteBlocked = _suitBlocked;
 
             if ( _aRouteBlocked && !_bRouteBlocked )
@@ -482,7 +492,33 @@ namespace Klondike
             }
 
             if ( _suitBlocked )
+            {
                 _blockList.Add( _suitBlocker );
+
+                if ( _suitRouteBlocked && _aRouteBlocked && _bRouteBlocked )
+                {
+                    if ( _debug )
+                        Debug.Log( name + " I'm not solvable but let's check parallel: " + _parallel.name );
+
+                    _parallelSuitRouteBlocked = !_parallel.ParallelSuitRoute( _restrictions, _blockList, _solverList, _debug );
+
+                    if ( !_parallelSuitRouteBlocked )
+                    {
+                        if ( _debug )
+                            Debug.Log( name + " Parallel: " + _parallel.name + " can still be suit solved!");
+
+                        _parallel.Highlight( Effect.MustSuitSolve );
+                        _solverList.Add( _parallel );
+                    }
+                    else
+                    {
+                        if ( _debug )
+                            Debug.Log( name + " Parallel: " + _parallel.name + " is also blocked!");
+
+                        _blockList.Add( _parallel );
+                    }
+                }
+            }
             else if ( _aRouteBlocked && _bRouteBlocked )
             {
                 if (_debug)
@@ -493,16 +529,8 @@ namespace Klondike
 
                 if ( _debug && _suitRouteBlocked )
                     Debug.Log( name + " Oh no! Suit cards are not solvable without me!");
-
-                /*
-                if ( _suitRouteBlocked)
-                {
-                    _parallelSuitRouteBlocked = ParallelSuitRoute( _restrictions, _blockList, _solverList, _debug );
-                }
-                */
             }
-
-            if ( _suitRouteBlocked && _aRouteBlocked && _bRouteBlocked )
+            if ( ( _suitRouteBlocked && _parallelSuitRouteBlocked ) && _aRouteBlocked && _bRouteBlocked )
             {
                 if (_debug)
                     Debug.Log( name + " I'm totally unsolvable in any way!");
@@ -624,7 +652,7 @@ namespace Klondike
 
             bool routeSuit = !_suitBlocked;
             bool routeA = !_aSolverBlocked;
-            bool routeB = !_bSolverBLocked;
+            bool routeB = !_bSolverBlocked;
 
             if ( routeA && !routeB )
             {
@@ -673,23 +701,15 @@ namespace Klondike
                 }
                 else
                 {
-                    try
-                    {
-                        if (debugMessages)
-                            Debug.Log( name + " | ACS | I'm solvable, but lets check above card " + cardAbove.name);
+                    if (debugMessages)
+                        Debug.Log( name + " | ACS | I'm solvable, but lets check above card " + cardAbove.name);
 
-                        bool a = cardAbove.AboveCardSolvable( limitA, limitB, debugMessages );
+                    bool a = cardAbove.AboveCardSolvable( limitA, limitB, debugMessages );
 
-                        if (debugMessages)
-                            Debug.Log( name + " | ACS | abovecard " + cardAbove.name + " returned " + a);
+                    if (debugMessages)
+                        Debug.Log( name + " | ACS | abovecard " + cardAbove.name + " returned " + a);
 
-                        return a;
-                    }
-                    catch (System.NullReferenceException e)
-                    {
-                        Debug.LogError( name +"("+ _status + ") | ACP | aboveCard missing! " + e );
-                        return false;
-                    }
+                    return a;
                 }
             }
         }
@@ -733,9 +753,21 @@ namespace Klondike
                 if ( _rank == 13)
                     return true;
 
-                bool a = _solverA.NextSolverAvailable( limitA, limitB, debugMessages );
-                bool b = _solverB.NextSolverAvailable( limitA, limitB, debugMessages );
+                bool a, b;
 
+                if ( _solverA.OffTable && _solverB.OffTable )
+                {
+                    if ( debugMessages )
+                        Debug.Log( name + " | AA | Both solvers " + _solverA.name + " and " + _solverB.name + " are off table, only one needs to be checked!");
+
+                    a = _solverA.NextSolverAvailable( limitA, limitB, debugMessages );
+                    b = a;
+                }
+                else
+                {
+                    a = _solverA.NextSolverAvailable( limitA, limitB, debugMessages );
+                    b = _solverB.NextSolverAvailable( limitA, limitB, debugMessages );
+                }
                 
                 if ( debugMessages )
                     Debug.Log( name + " | AA | " +_solverA.name + ": " + a + " | "+ _solverB.name +": " + b);
@@ -759,6 +791,18 @@ namespace Klondike
 
             if ( !_solved )
             {
+                if ( _status == CardStatus.Closed )
+                {
+                    if ( this._restrictions.pile == limit.pile &&
+                         this._restrictions.position > limit.position )
+                    {
+                        if ( debugMessages )
+                            Debug.Log( name + " | NSA I'm under " + limit.name + " and can't be used!");
+
+                        return false;
+                    }
+                }
+
                 if ( _status == CardStatus.Blocked )
                 {
                     if (debugMessages)
@@ -831,12 +875,10 @@ namespace Klondike
             }
         }
 
-        /*
         private bool ParallelSuitRoute( Restrictions limit, List<Card> blockList, List<Card> solverList, bool debugMessages )
         {
-            return _suitUp.NextSuitAvailable(limit, blockList, solverList, debugMessages);
+            return _suitDown.NextSuitAvailable(limit, blockList, solverList, debugMessages);
         }
-        */
 
     #region CardHover
         public void SaveOffset(Vector3 reference)
@@ -876,7 +918,7 @@ namespace Klondike
 
         private void NormalColor()
         {
-            if ( _suitRouteBlocked && _aRouteBlocked && _bRouteBlocked )
+            if ( (_suitRouteBlocked && _parallelSuitRouteBlocked) && _aRouteBlocked && _bRouteBlocked )
                 SetColor( Settings.Instance.block );
 
             else if ( _status == CardStatus.Closed )

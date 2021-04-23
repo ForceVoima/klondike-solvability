@@ -58,6 +58,28 @@ namespace Klondike
 
             if ( _numberOfCards > 1 )
                 _pile[_numberOfCards-2].Blocked( card );
+
+            if ( _track != card.Track )
+                _track = card.Track;
+        }
+
+        public override void ReceiveToIndex(Card card, int index)
+        {
+            card.transform.SetParent(transform);
+            _pile[ index ] = card;
+
+            card.MoveTo(
+                position: transform.position + _positions[ index ],
+                rotation: _rotation,
+                instant: true,
+                pile: _type,
+                parent: this
+            );
+
+            _numberOfCards++;
+
+            if ( _track != card.Track )
+                _track = card.Track;
         }
 
         public override void DealTopCard(CardPile pile)
@@ -75,6 +97,14 @@ namespace Klondike
         public override void TopCardTaken()
         {
             _pile[ _numberOfCards-1 ] = null;
+            _numberOfCards--;
+        }
+
+        public override void ReturnCard(Card card, CardPile pile, int sourceIndex)
+        {
+            int index = IndexOf( card );
+            pile.ReceiveToIndex( _pile[ index ], sourceIndex );
+            _pile[ index ] = null;
             _numberOfCards--;
         }
 
@@ -125,6 +155,12 @@ namespace Klondike
             {
                 if ( _pile[i] != null )
                 {
+                    TurnHistory.Instance.ReportMove(
+                        card: _pile[i],
+                        source: this,
+                        target: targetPile
+                    );
+
                     targetPile.ReceiveCard( card: _pile[i], moveCardGroup: true );
                     _pile[i] = null;
                     _numberOfCards--;
@@ -149,6 +185,21 @@ namespace Klondike
             }
             else
                 return false;
+        }
+
+        public override void PopulateHoverList(List<Card> cardList, Card card = null)
+        {
+            int index = 0;
+
+            if ( card != null )
+            {
+                index = IndexOf( card );
+            }
+
+            for (int i = index; i < _numberOfCards; i++)
+            {
+                cardList.Add( _pile[i] );
+            }
         }
     }
 }

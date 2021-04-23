@@ -16,6 +16,8 @@ namespace Klondike
 
         [SerializeField] private bool _mouseDown = false;
         [SerializeField] private bool _cardHoverActive = false;
+        [SerializeField] private bool _cardSequenceHoverActive = false;
+        public List<Card> _hoverList;
         [SerializeField] private float _mouseDownTimer = 0f, _betweenClicks = 0f;
 
         [SerializeField] private PileType _sourceType = PileType.NotSet;
@@ -48,6 +50,8 @@ namespace Klondike
             pilesMask = LayerMask.GetMask("Piles");
             hoverMask = LayerMask.GetMask("Default", "Piles");
             cardMask = LayerMask.GetMask("Cards");
+
+            _hoverList = new List<Card>();
         }
 
         private void Update()
@@ -81,6 +85,9 @@ namespace Klondike
 
             if ( _cardHoverActive )
                 CardHoverActions();
+
+            else if ( _cardSequenceHoverActive )
+                CardHoverListAction();
         }
 
         private void MouseButtonOneAction()
@@ -93,6 +100,15 @@ namespace Klondike
             {
                 _activeCard.EndHover();
                 _cardHoverActive = false;
+            }
+
+            if ( _cardSequenceHoverActive )
+            {
+                foreach (Card card in _hoverList)
+                {
+                    card.EndHover();
+                }
+                _cardSequenceHoverActive = false;
             }
 
             if ( _sourceType == PileType.NotSet ||
@@ -221,7 +237,10 @@ namespace Klondike
             }
 
             if ( _mouseOverType == PileType.BuildPile )
+            {
+                TurnHistory.Instance.StartNewMove();
                 _sourcePile.DealSequenceOfCards( _mouseOverPile );
+            }
         }
 
         private void SetSource()
@@ -297,10 +316,16 @@ namespace Klondike
                 return;
             }
 
+            if ( _mouseOverType == PileType.BuildPile )
+            {
+                SingleOrSequence();
+                return;
+            }
+
             if ( CardRaycast(out _activeCard) )
             {
                 if ( _activeCard == null && _mouseOverPile != null )
-                    _activeCard = _mouseOverPile.TopCard;
+                     _activeCard = _mouseOverPile.TopCard;
 
                 _activeCard.SaveOffset( _mousePointer );
                 _cardHoverActive = true;
@@ -337,6 +362,46 @@ namespace Klondike
             return false;
         }
 
+        private void SingleOrSequence()
+        {
+            if ( CardRaycast(out _activeCard) )
+            {
+                if ( _activeCard.Closed )
+                {
+                    _activeCard.SaveOffset( _mousePointer );
+                    _cardHoverActive = true;
+                    return;
+                }
+                else
+                {
+                    _hoverList.Clear();
+                    _mouseOverPile.PopulateHoverList( _hoverList, _activeCard );
+                    InitCardHoverList();
+                    _cardHoverActive = false;
+                    _cardSequenceHoverActive = true;
+                    return;
+                }
+            }
+            
+            if ( _mouseOverPile != null && _mouseOverPile.hasCards )
+            {
+                _hoverList.Clear();
+                _mouseOverPile.PopulateHoverList( _hoverList );
+                InitCardHoverList();
+                _cardHoverActive = false;
+                _cardSequenceHoverActive = true;
+                return;
+            }
+        }
+
+        private void InitCardHoverList()
+        {
+            for (int i = 0; i < _hoverList.Count; i++)
+            {
+                _hoverList[i].SaveOffset( _mousePointer );
+            }
+        }
+
         private void CardHoverActions()
         {
             RaycastHit hit;
@@ -350,6 +415,26 @@ namespace Klondike
             {
                 _mousePointer = hit.point;
                 _activeCard.Hover( hit.point );
+            }
+        }
+
+        private void CardHoverListAction()
+        {
+            RaycastHit hit;
+            Ray ray = _sceneCamera.ScreenPointToRay(Input.mousePosition);
+
+             if ( Physics.Raycast(
+                  ray: ray,
+                  hitInfo: out hit,
+                  maxDistance: 100f,
+                  layerMask: hoverMask ) )
+            {
+                _mousePointer = hit.point;
+                
+                foreach (Card card in _hoverList)
+                {
+                    card.Hover( _mousePointer );
+                }
             }
         }
 
