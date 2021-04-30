@@ -50,6 +50,7 @@ namespace Klondike
 
     public enum MoveType
     {
+        Null,
         Stock,
         ClosedToOpen,
         TableToTable,

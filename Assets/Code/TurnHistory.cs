@@ -107,6 +107,12 @@ namespace Klondike
             _moves.Add( _currentMove );
         }
 
+        public void ReportMove(Card[] cards, CardPile source, CardPile target)
+        {
+            _currentMove = new Move( _moveNumber, cards, source, target );
+            _moves.Add( _currentMove );
+        }
+
         private void ReturnToStock(Move move)
         {
             int newIndex = move.sourceIndex - (_stock.NumberOfCards - 1);
@@ -114,10 +120,10 @@ namespace Klondike
             if ( newIndex == 1 )
             {
                 if ( move.sourcePile.Type == PileType.Stock )
-                    move.targetPile.DealTopCard( _stock );
+                    move.targetPile.ReturnTopCard( _stock );
 
                 else if ( move.sourcePile.Type == PileType.WasteHeap )
-                    move.targetPile.DealTopCard( _waste );
+                    move.targetPile.ReturnTopCard( _waste );
             }
             else if ( move.sourceIndex < _stock.NumberOfCards )
             {
@@ -146,7 +152,7 @@ namespace Klondike
 
         private void ReturnToBuildPile(Move move)
         {
-            move.targetPile.ReturnCard( move.sourceCard, move.sourcePile, move.sourceIndex );
+            move.targetPile.ReturnCards( move.sourceCards, move.sourcePile );
         }
     }
 }

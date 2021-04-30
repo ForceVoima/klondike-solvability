@@ -10,16 +10,23 @@ namespace Klondike
         public int moveNumber;
         public MoveType type;
         public Card sourceCard;
+        public Card[] sourceCards;
         public CardPile sourcePile;
         public int sourceIndex;
         public CardPile targetPile;
         public int targetIndex;
         public bool confirmed;
 
+        public Move()
+        {
+            type = MoveType.Null;
+        }
+
         public Move(int moveNumber, Card card, CardPile source, CardPile target)
         {
             this.moveNumber = moveNumber;
             this.sourceCard = card;
+            this.sourceCards = null;
             this.sourcePile = source;
             this.targetPile = target;
 
@@ -49,6 +56,16 @@ namespace Klondike
             {
                 type = MoveType.WorryBack;
             }
+        }
+
+        public Move(int moveNumber, Card[] cards, CardPile source, CardPile target)
+        {
+            this.moveNumber = moveNumber;
+            this.sourceCard = null;
+            this.sourceCards = cards;
+            this.sourcePile = source;
+            this.targetPile = target;
+            this.type = MoveType.TableToTable;
         }
     }
 }

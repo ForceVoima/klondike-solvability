@@ -100,12 +100,34 @@ namespace Klondike
             _numberOfCards--;
         }
 
+        public override void ReturnTopCard(CardPile pile)
+        {
+            base.ReturnTopCard(pile);
+            
+            if ( pile.Type == PileType.ClosedPile )
+                GameMaster.Instance.CardReClosed();
+        }
+
         public override void ReturnCard(Card card, CardPile pile, int sourceIndex)
         {
             int index = IndexOf( card );
             pile.ReceiveToIndex( _pile[ index ], sourceIndex );
             _pile[ index ] = null;
             _numberOfCards--;
+        }
+
+        public override void ReturnCards(Card[] cards, CardPile pile)
+        {
+            int index = IndexOf( cards[0] );
+
+            for (int i = 0; i < cards.Length; i++)
+            {
+                pile.ReceiveCard( card: _pile[ index ], moveCardGroup: true );
+                this._pile[ index ] = null;
+                _numberOfCards--;
+            }
+
+            TopCard.Opened();
         }
 
         public void CheckEmpty()
@@ -123,21 +145,22 @@ namespace Klondike
 
         public override void DealSequenceOfCards(CardPile targetPile)
         {
-            int rank, i;
+            int rank, i, j;
             Card _blockedCard = targetPile.TopCard;
 
+            // Space is filled with a king
             if ( !targetPile.hasCards )
             {
                 rank = 13;
                 i = 0;
             }
-            else if ( _track == targetPile.TopCard.Track )
-            {
-                rank = targetPile.TopCard.Rank - 1;
-                i = 0;
-            }
-            else
+
+            // Unable to perform move
+            else if ( this._track != targetPile.TopCard.Track )
                 return;
+
+            rank = targetPile.TopCard.Rank - 1;
+            i = 0;
 
             while ( i < _numberOfCards )
             {
@@ -149,6 +172,14 @@ namespace Klondike
                     return;
             }
 
+            j = 0;
+            Card[] cards = new Card[ this.NumberOfCards - i ];
+
+            // Empty move!
+            if ( this.NumberOfCards - i == 0 )
+                return;
+
+            // A previously opened card is solved!
             if ( i == 0 )
                 _pile[i].Solved();
 
@@ -156,24 +187,28 @@ namespace Klondike
             {
                 if ( _pile[i] != null )
                 {
-                    TurnHistory.Instance.ReportMove(
-                        card: _pile[i],
-                        source: this,
-                        target: targetPile
-                    );
+                    cards[j] = _pile[i];
 
                     targetPile.ReceiveCard( card: _pile[i], moveCardGroup: true );
                     _pile[i] = null;
                     _numberOfCards--;
+
                     i++;
+                    j++;
                 }
                 else
                 {
+                    TurnHistory.Instance.ReportMove(
+                        cards: cards,
+                        source: this,
+                        target: targetPile
+                    );
+
                     CheckEmpty();
 
                     if ( _blockedCard != null )
                         _blockedCard.BlockedNotify();
-                        
+
                     return;
                 }
             }

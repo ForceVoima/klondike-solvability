@@ -362,6 +362,12 @@ namespace Klondike
             gameProgressText.text = _gameProgress + "/21";
         }
 
+        public void CardReClosed()
+        {
+            _gameProgress--;
+            gameProgressText.text = _gameProgress + "/21";
+        }
+
         private void SaveProgress()
         {
             if ( _gameProgress >= _currentGame.bestOpens )

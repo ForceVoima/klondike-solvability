@@ -68,6 +68,10 @@ namespace Klondike
         {
         }
 
+        public virtual void ReturnCards(Card[] cards, CardPile pile)
+        {
+        }
+
         public virtual void ResetCards(Stock stock)
         {
             for (int i = 0; i < _numberOfCards; i++)

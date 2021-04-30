@@ -302,18 +302,13 @@ namespace Klondike
                 if ( !_solved )
                     Solved();
 
-                Highlight( Effect.Normal );
-                _status = CardStatus.Foundation;
-                //Debug.Log( name + " founded!");
+                Founded();
                 return;
             }
 
             else if ( pile == PileType.ClosedPile )
             {
-                _solved = false;
-                _status = CardStatus.Closed;
-                SetColor( Settings.Instance.closed );
-                //Debug.Log( name + " closed!");
+                Closed();
                 return;
             }
 
@@ -357,6 +352,21 @@ namespace Klondike
 
             if ( _currentEffect != Effect.Solvable || _currentEffect != Effect.MustSuitSolve )
                 Highlight( Effect.Normal );
+        }
+
+        private void Founded()
+        {
+            Highlight( Effect.Normal );
+            _status = CardStatus.Foundation;
+            //Debug.Log( name + " founded!");
+        }
+
+        private void Closed()
+        {
+            _solved = false;
+            _status = CardStatus.Closed;
+            SetColor( Settings.Instance.closed );
+            //Debug.Log( name + " closed!");
         }
 
         public void Opened()
