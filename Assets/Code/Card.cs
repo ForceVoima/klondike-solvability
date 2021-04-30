@@ -27,6 +27,7 @@ namespace Klondike
 
         [SerializeField] private CardStatus _status = CardStatus.Stock;
         public bool IsClosed { get { return _status == CardStatus.Closed; } }
+        public bool IsBlocked { get { return _status == CardStatus.Blocked; } }
 
         public bool SuitSolvable { get { return (_status == CardStatus.Open || _status == CardStatus.Stock); } }
         public bool OnTable { get {
@@ -214,8 +215,10 @@ namespace Klondike
                 cardBelow = _blockedCards[ _blockedCards.Length - 1 ];
                 cardBelow.cardAbove = this;
 
+                // Card is impossible to solve in trivial way
                 if ( _aSolverBlocked && _bSolverBlocked && _suitBlocked )
                 {
+                    _impossible = true;
                     SetColor( Settings.Instance.block );
                     _suitBlocker.SetColor( Settings.Instance.block );
                     _solverA.SetColor( Settings.Instance.block );
@@ -337,21 +340,21 @@ namespace Klondike
 
         public void Solved()
         {
+            // If solved despite being close to impoosible: change color
             if ( _suitRouteBlocked && _aRouteBlocked && _bRouteBlocked )
             {
-                _suitRouteBlocked = false;
-                _aRouteBlocked = false;
-                _bRouteBlocked = false;
                 SetColor( Settings.Instance.open );
             }
 
             _solved = true;
-            _aSolverBlocked = false;
-            _bSolverBlocked = false;
-            _blockedCards = null;
 
             if ( _currentEffect != Effect.Solvable || _currentEffect != Effect.MustSuitSolve )
                 Highlight( Effect.Normal );
+        }
+
+        public void UnSolved()
+        {
+            _solved = false;
         }
 
         private void Founded()
@@ -474,8 +477,27 @@ namespace Klondike
             }
         }
 
-        public void UpdateRoutes()
+        public void UpdateRoutes(bool debugVisuals = false)
         {
+            if ( debugVisuals )
+            {
+                string below, card, above;
+
+                if ( cardBelow == null)
+                    below = "";
+                else
+                    below = cardBelow.name;
+                    
+                card = name;
+
+                if ( cardAbove == null)
+                    above = "";
+                else
+                    above = cardAbove.name;
+
+                VisualHelper.Instance.AboveBelowCards( below, card, above );
+            }
+
             if ( KingOrAce )
                 return;
                 
@@ -534,7 +556,12 @@ namespace Klondike
                     if ( _debug )
                         Debug.Log( name + " I'm not solvable but let's check parallel: " + _parallel.name );
 
-                    _parallelSuitRouteBlocked = !_parallel.ParallelSuitRoute( _restrictions, _blockList, _solverList, _debug );
+                    if ( _solverA.IsBlocked || _solverB.IsBlocked )
+                        _parallelSuitRouteBlocked = !_parallel.ParallelSuitRoute( _restrictions, _blockList, _solverList, _debug );
+
+                    else
+                        _parallelSuitRouteBlocked = true;
+
 
                     if ( !_parallelSuitRouteBlocked )
                     {
@@ -564,6 +591,7 @@ namespace Klondike
                 if ( _debug && _suitRouteBlocked )
                     Debug.Log( name + " Oh no! Suit cards are not solvable without me!");
             }
+            
             if ( ( _suitRouteBlocked && _parallelSuitRouteBlocked ) && _aRouteBlocked && _bRouteBlocked )
             {
                 if (_debug)
@@ -684,6 +712,9 @@ namespace Klondike
                 }
             }
 
+            if ( _solved )
+                Debug.LogError( name + "(" + _status + ") | ACS | I'm solved and not supposed to be above anything");
+
             bool routeSuit = !_suitBlocked;
             bool routeA = !_aSolverBlocked;
             bool routeB = !_bSolverBlocked;
@@ -725,8 +756,7 @@ namespace Klondike
             }
             else
             {
-                if ( _status == CardStatus.Open ||
-                     _status == CardStatus.Blocked )
+                if ( _status == CardStatus.Open || _status == CardStatus.Blocked )
                 {
                     if (debugMessages)
                         Debug.Log(name + " | ACS | I'm top of pile and solvable!" );
@@ -739,7 +769,10 @@ namespace Klondike
                         Debug.Log( name + " | ACS | I'm solvable, but lets check above card " + cardAbove.name);
 
                     if ( cardAbove == null)
+                    {
+                        Debug.LogError( name + "(" + _status + ") ACS | my abovecard is null!");
                         return true;
+                    }
 
                     bool a = cardAbove.AboveCardSolvable( limitA, limitB, debugMessages );
 

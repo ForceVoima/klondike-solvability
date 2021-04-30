@@ -39,6 +39,9 @@ namespace Klondike
 
         public override void ReceiveCard(Card card, bool moveCardGroup = false)
         {
+            if ( !hasCards )
+                card.UnSolved();
+
             card.transform.SetParent(transform);
 
             _pile[_numberOfCards] = card;
@@ -58,25 +61,6 @@ namespace Klondike
 
             if ( _numberOfCards > 1 )
                 _pile[_numberOfCards-2].Blocked( card );
-
-            if ( _track != card.Track )
-                _track = card.Track;
-        }
-
-        public override void ReceiveToIndex(Card card, int index)
-        {
-            card.transform.SetParent(transform);
-            _pile[ index ] = card;
-
-            card.MoveTo(
-                position: transform.position + _positions[ index ],
-                rotation: _rotation,
-                instant: true,
-                pile: _type,
-                parent: this
-            );
-
-            _numberOfCards++;
 
             if ( _track != card.Track )
                 _track = card.Track;
@@ -106,14 +90,6 @@ namespace Klondike
             
             if ( pile.Type == PileType.ClosedPile )
                 GameMaster.Instance.CardReClosed();
-        }
-
-        public override void ReturnCard(Card card, CardPile pile, int sourceIndex)
-        {
-            int index = IndexOf( card );
-            pile.ReceiveToIndex( _pile[ index ], sourceIndex );
-            _pile[ index ] = null;
-            _numberOfCards--;
         }
 
         public override void ReturnCards(Card[] cards, CardPile pile)
@@ -159,8 +135,11 @@ namespace Klondike
             else if ( this._track != targetPile.TopCard.Track )
                 return;
 
-            rank = targetPile.TopCard.Rank - 1;
-            i = 0;
+            else
+            {
+                rank = targetPile.TopCard.Rank - 1;
+                i = 0;
+            }
 
             while ( i < _numberOfCards )
             {

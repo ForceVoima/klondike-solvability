@@ -29,10 +29,11 @@ namespace Klondike
         private Card _showSolversCard;
         [SerializeField] private Camera _sceneCamera;
         private Vector3 _mousePointer;
+        [SerializeField] private bool _debugVisuals = false;
 
-        public int pilesMask;
-        public int hoverMask;
-        public int cardMask;
+        private int pilesMask;
+        private int hoverMask;
+        private int cardMask;
 
         public void Init()
         {
@@ -451,7 +452,7 @@ namespace Klondike
             if ( _showSolversCard == null || !_showSolversCard.OnTable )
                 return;
             
-            _showSolversCard.UpdateRoutes();
+            _showSolversCard.UpdateRoutes( _debugVisuals );
             _showSolversCard.ShowSolver(true);
         }
 
