@@ -76,9 +76,14 @@ namespace Klondike
             if ( Input.GetMouseButtonUp(1) )
                 MouseButtonTwoAction();
 
-            if ( Input.GetMouseButtonDown(3) )
+            if ( Input.GetMouseButtonDown(2) ||
+                 Input.GetMouseButtonDown(3) ||
+                 Input.GetMouseButtonDown(4) )
                 MouseFourDown();
-            if ( Input.GetMouseButtonUp(3) )
+                
+            if ( Input.GetMouseButtonUp(2) ||
+                 Input.GetMouseButtonUp(3) ||
+                 Input.GetMouseButtonUp(4) )
                 MouseFourUp();
 
             MouseWheelInputs();
@@ -245,7 +250,7 @@ namespace Klondike
 
         private void SetSource()
         {
-            if ( _cardHoverActive && _activeCard.Closed )
+            if ( _cardHoverActive && _activeCard.IsClosed )
             {
                 _sourceType = PileType.NotSet;
                 _sourcePile = null;
@@ -366,7 +371,7 @@ namespace Klondike
         {
             if ( CardRaycast(out _activeCard) )
             {
-                if ( _activeCard.Closed )
+                if ( _activeCard.IsClosed )
                 {
                     _activeCard.SaveOffset( _mousePointer );
                     _cardHoverActive = true;

@@ -39,6 +39,7 @@ namespace Klondike
         public Color closed = new Color( 0.6f, 0.6f, 0.6f, 1f);
         public Color block = new Color(r: 1.0f, 0.75f, 0.75f, 1f);
         public Color solver = new Color(r: 0.75f, g: 1.0f, 0.75f, 1f);
+        public Color yellow = new Color(r: 0.75f, g: 0.75f, b: 1.00f, a: 1.00f);
 
         public static Settings _instance;
         public static Settings Instance

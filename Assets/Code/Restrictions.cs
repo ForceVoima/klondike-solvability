@@ -19,5 +19,10 @@ namespace Klondike
             pile = 0;
             position = 0;
         }
+
+        public bool Under(Restrictions limit)
+        {
+            return ( this.pile == limit.pile && this.position > limit.position );
+        }
     }
 }

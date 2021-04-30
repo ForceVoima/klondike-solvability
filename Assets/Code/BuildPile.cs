@@ -118,12 +118,13 @@ namespace Klondike
                     _closed.DealTopCard( this );
             }
             else
-                _pile[ _numberOfCards-1 ].UnBlocked();
+                _pile[ _numberOfCards-1 ].Opened();
         }
 
         public override void DealSequenceOfCards(CardPile targetPile)
         {
             int rank, i;
+            Card _blockedCard = targetPile.TopCard;
 
             if ( !targetPile.hasCards )
             {
@@ -169,6 +170,10 @@ namespace Klondike
                 else
                 {
                     CheckEmpty();
+
+                    if ( _blockedCard != null )
+                        _blockedCard.BlockedNotify();
+                        
                     return;
                 }
             }

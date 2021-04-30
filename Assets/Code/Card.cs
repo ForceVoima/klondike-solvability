@@ -26,7 +26,8 @@ namespace Klondike
         public bool Red { get { return _red; } }
 
         [SerializeField] private CardStatus _status = CardStatus.Stock;
-        public bool Closed { get { return _status == CardStatus.Closed; } }
+        public bool IsClosed { get { return _status == CardStatus.Closed; } }
+
         public bool SuitSolvable { get { return (_status == CardStatus.Open || _status == CardStatus.Stock); } }
         public bool OnTable { get {
             return ( _status == CardStatus.Closed ||
@@ -57,6 +58,7 @@ namespace Klondike
         [SerializeField] private bool _suitRouteBlocked = false;
         [SerializeField] private bool _parallelSuitRouteBlocked = false;
         [SerializeField] private bool _solved = true;
+        [SerializeField] private bool _impossible = false;
         private int _solversBlocked = 0;
         [SerializeField] private Restrictions _restrictions;
 
@@ -67,6 +69,7 @@ namespace Klondike
         [SerializeField] private Rigidbody _rigidBody;
 
         public bool _debug = false;
+        private bool _blockedNotify = false;
 
         private Vector3 _original = new Vector3();
         private Vector3 _offset = new Vector3();
@@ -237,6 +240,8 @@ namespace Klondike
             _rigidBody.isKinematic = true;
             _status = CardStatus.Stock;
             _restrictions = new Restrictions(name);
+            _impossible = false;
+            _blockedNotify = false;
         }
 
         public void Highlight(Effect code)
@@ -299,6 +304,7 @@ namespace Klondike
 
                 Highlight( Effect.Normal );
                 _status = CardStatus.Foundation;
+                //Debug.Log( name + " founded!");
                 return;
             }
 
@@ -307,6 +313,7 @@ namespace Klondike
                 _solved = false;
                 _status = CardStatus.Closed;
                 SetColor( Settings.Instance.closed );
+                //Debug.Log( name + " closed!");
                 return;
             }
 
@@ -347,10 +354,12 @@ namespace Klondike
             _aSolverBlocked = false;
             _bSolverBlocked = false;
             _blockedCards = null;
-            Highlight( Effect.Normal );
+
+            if ( _currentEffect != Effect.Solvable || _currentEffect != Effect.MustSuitSolve )
+                Highlight( Effect.Normal );
         }
 
-        private void Opened()
+        public void Opened()
         {
             if ( _status == CardStatus.Closed )
                 GameMaster.Instance.CardOpened();
@@ -359,6 +368,8 @@ namespace Klondike
             AIMaster.Instance.UpdateSolvable( _suit );
             SetColor( Settings.Instance.open );
             cardAbove = null;
+
+            //Debug.Log( name + " opened!");
         }
 
         public void Blocked(Card byCard)
@@ -366,6 +377,19 @@ namespace Klondike
             _status = CardStatus.Blocked;
             cardAbove = byCard;
             cardAbove.cardBelow = this;
+            _blockedNotify = true;
+
+            //SetColor( Settings.Instance.yellow );
+            //Debug.Log( name + " blocked!");
+        }
+
+        public void BlockedNotify()
+        {
+            if ( !_blockedNotify )
+                return;
+
+            //Debug.Log( name + "(" + _status + ") notifies others!");
+
             RecursiveSolvable( false );
 
             if ( _rank > 2 )
@@ -376,13 +400,6 @@ namespace Klondike
 
             if ( _rank < 13 )
                 _suitUp.SuitUpRecursiveUpdate();
-        }
-
-        public void UnBlocked()
-        {
-            _status = CardStatus.Open;
-            cardAbove = null;
-            AIMaster.Instance.UpdateSolvable( _suit );
         }
         #endregion StatusChecks
 
@@ -438,6 +455,13 @@ namespace Klondike
 
             if ( _blockedCards.Length > 0 || allCards )
                 Statistics.Instance.AdvancedReport( _suitRouteBlocked, _aRouteBlocked, _bRouteBlocked );
+
+            if ( _suitRouteBlocked && _aRouteBlocked && _bRouteBlocked )
+            {
+                SetColor(Settings.Instance.block);
+                Highlight( Effect.Normal );
+                _impossible = true;
+            }
         }
 
         public void UpdateRoutes()
@@ -537,6 +561,7 @@ namespace Klondike
 
                 SetColor(Settings.Instance.block);
                 Highlight( Effect.Normal );
+                _impossible = true;
                 return;
             }
             else
@@ -590,7 +615,7 @@ namespace Klondike
                     return true;
                 }
             }
-            else if ( _status == CardStatus.Stock )
+            else if ( _status == CardStatus.Stock || _status == CardStatus.Foundation )
             {
                 if ( _rank == 13)
                     return true;
@@ -599,7 +624,7 @@ namespace Klondike
                 bool b = _solverB.Available( restrictions, blocklist, solveList, debugMessages );
 
                 if ( debugMessages )
-                    Debug.Log( name + " Available() " +_solverA.name + ": " + a + " | "+ _solverB.name +": " + b);
+                    Debug.Log( name + "(" + _status + ") | A | " +_solverA.name + ": " + a + " | "+ _solverB.name +": " + b);
 
                 solveList.Add( this );
 
@@ -615,15 +640,6 @@ namespace Klondike
                 return false;
             }
 
-            else if ( _status == CardStatus.Foundation )
-            {
-                if (debugMessages)
-                    Debug.Log( name + " | A | I'm in Foundation and assumed available!");
-                
-                solveList.Add( this );
-                return true;
-            }
-
             return false;
         }
 
@@ -631,6 +647,14 @@ namespace Klondike
         {
             if (debugMessages)
                 Debug.Log( name + " | ACS | called");
+
+            if ( _impossible )
+            {
+                if ( debugMessages )
+                    Debug.Log( name + "I'm impossible to solve: False");
+
+                return false;
+            }
 
             if ( KingOrAce )
             {
@@ -704,6 +728,9 @@ namespace Klondike
                     if (debugMessages)
                         Debug.Log( name + " | ACS | I'm solvable, but lets check above card " + cardAbove.name);
 
+                    if ( cardAbove == null)
+                        return true;
+
                     bool a = cardAbove.AboveCardSolvable( limitA, limitB, debugMessages );
 
                     if (debugMessages)
@@ -721,9 +748,7 @@ namespace Klondike
 
             if ( _status == CardStatus.Closed || _status == CardStatus.Open )
             {
-                if ( !_solved &&
-                     this._restrictions.pile == limitA.pile &&
-                     this._restrictions.position > limitA.position )
+                if ( !_solved && this._restrictions.Under( limitA ) )
                 {
                     if (debugMessages)
                         Debug.Log( name + ": False | I'm under " + limitA.name + " and not available!");
@@ -731,9 +756,7 @@ namespace Klondike
                     return false;
                 }
 
-                if ( !_solved &&
-                     this._restrictions.pile == limitB.pile &&
-                     this._restrictions.position > limitB.position )
+                if ( !_solved && this._restrictions.Under( limitB ) )
                 {
                     if (debugMessages)
                         Debug.Log( name + ": False | I'm under " + limitB.name + " and not available!");
@@ -793,8 +816,7 @@ namespace Klondike
             {
                 if ( _status == CardStatus.Closed )
                 {
-                    if ( this._restrictions.pile == limit.pile &&
-                         this._restrictions.position > limit.position )
+                    if ( this._restrictions.Under( limit ) )
                     {
                         if ( debugMessages )
                             Debug.Log( name + " | NSA I'm under " + limit.name + " and can't be used!");
@@ -899,10 +921,15 @@ namespace Klondike
 
         public void ShowSolver(bool show)
         {
+            if ( show )
+                SetColor( Settings.Instance.yellow );
+            else
+                NormalColor();
+
             foreach (Card card in _blockList)
             {
                 if ( show )
-                    card.SetColor( Settings.Instance.block );
+                    card.HighlightColor( Settings.Instance.block );
                 else
                     card.NormalColor();
             }
@@ -910,9 +937,20 @@ namespace Klondike
             foreach (Card card in _solverList)
             {
                 if ( show )
-                    card.SetColor( Settings.Instance.solver );
+                    card.HighlightColor( Settings.Instance.solver );
                 else
                     card.NormalColor();
+            }
+        }
+
+        public void HighlightColor( Color color )
+        {
+            SetColor( color );
+
+            if ( _status == CardStatus.Foundation )
+            {
+                _original = transform.position;
+                transform.position = transform.position + Vector3.back * 2f;
             }
         }
 
@@ -924,8 +962,14 @@ namespace Klondike
             else if ( _status == CardStatus.Closed )
                 SetColor( Settings.Instance.closed );
 
+            //else if ( _status == CardStatus.Blocked )
+            //    SetColor( Settings.Instance.yellow );
+
             else
                 SetColor( Settings.Instance.open );
+
+            if ( _status == CardStatus.Foundation )
+                transform.position = _original;
         }
     }
     #endregion CardHover
