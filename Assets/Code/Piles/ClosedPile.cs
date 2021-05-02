@@ -42,6 +42,12 @@ namespace Klondike
 
         public override void ReceiveCard(Card card, bool moveCardGroup = false)
         {
+            if ( hasCards ) 
+            {
+                TopCard.cardAbove = card;
+                card.cardBelow = TopCard;
+            }
+
             card.ClosedCards( _pile, _pileNumber, _numberOfCards );
             base.ReceiveCard(card);
             _build.transform.position = _positions[ _numberOfCards ];
@@ -55,7 +61,10 @@ namespace Klondike
                 target: pile
             );
 
-            base.DealTopCard(pile);
+            pile.ReceiveCard( _pile[ _numberOfCards-1 ]);
+            _pile[ _numberOfCards-1 ] = null;
+            _numberOfCards--;
+            
             _build.transform.position = _positions[ _numberOfCards ];
         }
     }

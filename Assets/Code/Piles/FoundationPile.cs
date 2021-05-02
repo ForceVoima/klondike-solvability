@@ -72,6 +72,7 @@ namespace Klondike
             );
 
             base.DealTopCard(pile);
+
             GameMaster.Instance.FoundationTakenCard();
             AIMaster.Instance.CardFounded( suit, rank-1 );
         }

@@ -160,6 +160,8 @@ namespace Klondike
 
             if ( !moveCardGroup )
                 StatusCheck( pile );
+
+            _original = transform.position;
         }
 
         public void ClosedCards(Card[] cards, int pileNumber, int numberOfCards)
@@ -488,7 +490,7 @@ namespace Klondike
                 else
                     below = cardBelow.name;
                     
-                card = name;
+                card = name + "(" + _status + ")";
 
                 if ( cardAbove == null)
                     above = "";
@@ -992,8 +994,7 @@ namespace Klondike
 
             if ( _status == CardStatus.Foundation )
             {
-                _original = transform.position;
-                transform.position = transform.position + Vector3.back * 2f;
+                transform.position = _original + Vector3.back * 2f;
             }
         }
 

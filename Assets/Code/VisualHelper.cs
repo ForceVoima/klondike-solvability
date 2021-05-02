@@ -39,7 +39,7 @@ namespace Klondike
         public void AboveBelowCards(string below, string card, string above)
         {
             _below.text = "Below: " + below;
-            _card.text = "Card: " + card;
+            _card.text = card;
             _above.text = "Above: " + above;
         }
     }

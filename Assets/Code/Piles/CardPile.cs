@@ -48,6 +48,8 @@ namespace Klondike
         
         public virtual void DealTopCard(CardPile pile)
         {
+            TopCard.cardBelow = null;
+
             pile.ReceiveCard( _pile[ _numberOfCards-1 ]);
             _pile[ _numberOfCards-1 ] = null;
             _numberOfCards--;

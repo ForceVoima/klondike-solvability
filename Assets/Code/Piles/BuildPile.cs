@@ -42,6 +42,21 @@ namespace Klondike
             if ( !hasCards )
                 card.UnSolved();
 
+            if ( hasCards ) 
+            {
+                TopCard.cardAbove = card;
+                card.cardBelow = TopCard;
+            }
+            else if ( _closed.hasCards && card != _closed.TopCard )
+            {
+                _closed.TopCard.cardAbove = card;
+                card.cardBelow = _closed.TopCard;
+            }
+            else if ( !this.hasCards && !_closed.hasCards )
+            {
+                card.cardBelow = null;
+            }
+
             card.transform.SetParent(transform);
 
             _pile[_numberOfCards] = card;
@@ -80,6 +95,9 @@ namespace Klondike
 
         public override void TopCardTaken()
         {
+            //if ( hasCards )
+            //    TopCard.cardAbove = null;
+
             _pile[ _numberOfCards-1 ] = null;
             _numberOfCards--;
         }
@@ -90,10 +108,25 @@ namespace Klondike
             
             if ( pile.Type == PileType.ClosedPile )
                 GameMaster.Instance.CardReClosed();
+
+            if ( hasCards )
+            {
+                TopCard.Opened();
+                TopCard.cardAbove = null;
+            }
+
+            // Pile is left completely empty
+            else
+                _track = Track.Empty;
         }
 
         public override void ReturnCards(Card[] cards, CardPile pile)
         {
+            if ( cards[0].cardBelow != null )
+                cards[0].cardBelow.cardAbove = null;
+
+            cards[0].cardBelow = null;
+
             int index = IndexOf( cards[0] );
 
             for (int i = 0; i < cards.Length; i++)
@@ -101,9 +134,15 @@ namespace Klondike
                 pile.ReceiveCard( card: _pile[ index ], moveCardGroup: true );
                 this._pile[ index ] = null;
                 _numberOfCards--;
+                index++;
             }
 
-            TopCard.Opened();
+            if ( hasCards )
+                TopCard.Opened();
+
+            // Pile is left completely empty
+            else
+                _track = Track.Empty;
         }
 
         public void CheckEmpty()
